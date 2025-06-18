@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "YT-DLP-UI (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "YT-DLP-UI (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
