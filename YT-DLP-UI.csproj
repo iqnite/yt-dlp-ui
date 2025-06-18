@@ -43,6 +43,11 @@
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.7.250606001" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="yt-dlp\**\*.*">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
     <Page Update="HomePage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>

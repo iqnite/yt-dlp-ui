@@ -23,7 +23,9 @@
                  Grid.Column="1"/>
             <Button x:Name="PickDestinationButton" Content="Choose destination" Click="PickDestinationButton_Click"/>
             <TextBlock x:Name="PickDestinationOutputTextBlock" Text="No folder selected" TextWrapping="Wrap" Padding="20,5,0,0"/>
-            <Button Content="Download" IsEnabled="False"/>
+            <Button x:Name="DownloadButton" Content="Download" Style="{StaticResource AccentButtonStyle}" Click="DownloadButton_Click"/>
+            <ProgressBar x:Name="DownloadProgressBar" Visibility="Collapsed" IsIndeterminate="True" ShowPaused="False" ShowError="False" />
+            <InfoBar x:Name="DownloadStatusInfoBar" IsOpen="False"/>
         </StackPanel>
     </Grid>
 </Page>

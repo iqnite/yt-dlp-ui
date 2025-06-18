@@ -7,8 +7,10 @@ using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using Windows.Foundation;
@@ -29,6 +31,7 @@ public sealed partial class HomePage : Page
 {
     private StorageFolder settingsFolder = ApplicationData.Current.LocalFolder;
     private StorageFolder downloadFolder = KnownFolders.VideosLibrary;
+    private string exePath = Path.Combine(AppContext.BaseDirectory, "yt-dlp", "yt-dlp.exe");
 
     public HomePage()
     {
@@ -38,7 +41,7 @@ public sealed partial class HomePage : Page
 
     private void HomePage_Loaded(object sender, RoutedEventArgs e)
     {
-        PickDestinationOutputTextBlock.Text = downloadFolder.Path;
+        PickDestinationOutputTextBlock.Text = "Please select a destination folder";
     }
 
     private async void PickDestinationButton_Click(object sender, RoutedEventArgs e)
@@ -62,8 +65,9 @@ public sealed partial class HomePage : Page
         StorageFolder folder = await downloadFolderPicker.PickSingleFolderAsync();
         if (folder != null)
         {
+            downloadFolder = folder;
             StorageApplicationPermissions.FutureAccessList.AddOrReplace("PickedFolderToken", folder);
-            PickDestinationOutputTextBlock.Text = "Files will be saved to \"" + folder.Path + "\"";
+            PickDestinationOutputTextBlock.Text = "Files will be saved to \"" + downloadFolder.Path + "\"";
         }
         else
         {
@@ -72,5 +76,54 @@ public sealed partial class HomePage : Page
 
         //re-enable the button
         if (senderButton != null) senderButton.IsEnabled = true;
+    }
+
+    private async void DownloadButton_Click(object sender, RoutedEventArgs e)
+    {
+        string link = LinkTextBox.Text.Trim();
+        if (string.IsNullOrEmpty(link)) return;
+        DownloadProgressBar.Visibility = Visibility.Visible;
+        DownloadButton.IsEnabled = false;
+
+        try
+        {
+            int? exitCode = await Task.Run(() =>
+            {
+                using var downloadProcess = Process.Start(new ProcessStartInfo
+                {
+                    FileName = exePath,
+                    Arguments = "-P " + downloadFolder.Path + " " + link,
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                });
+                downloadProcess?.WaitForExit();
+                return downloadProcess?.ExitCode;
+            });
+
+            if (exitCode == 0)
+            {
+                DownloadStatusInfoBar.Severity = InfoBarSeverity.Success;
+                DownloadStatusInfoBar.Message = "Download completed successfully!";
+                DownloadStatusInfoBar.IsOpen = true;
+            }
+            else
+            {
+                DownloadStatusInfoBar.Severity = InfoBarSeverity.Error;
+                DownloadStatusInfoBar.Message = "Download failed with exit code: " + exitCode + "\nCheck the link and try again.";
+                DownloadStatusInfoBar.IsOpen = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            DownloadStatusInfoBar.Severity = InfoBarSeverity.Error;
+            DownloadStatusInfoBar.Message = "An error occurred while downloading: " + ex.Message;
+            DownloadStatusInfoBar.IsOpen = true;
+        }
+        finally
+        {
+            DownloadProgressBar.Visibility = Visibility.Collapsed;
+            DownloadButton.IsEnabled = true;
+        }
     }
 }
