@@ -14,6 +14,21 @@
     </Window.SystemBackdrop>
 
     <Grid>
+        <Grid.RowDefinitions>
+            <!-- Title Bar -->
+            <RowDefinition Height="Auto" />
+            <!-- App Content -->
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
 
+            <TitleBar x:Name="AppTitleBar"
+              Title="YouTube Downloader">
+            <TitleBar.IconSource>
+                <FontIconSource Glyph="&#xEBD3;"/>
+            </TitleBar.IconSource>
+        </TitleBar>
+
+        <!-- App content -->
+        <Frame x:Name="rootFrame" Grid.Row="1"/>
     </Grid>
 </Window>
