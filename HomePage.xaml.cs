@@ -35,12 +35,8 @@ public sealed partial class HomePage : Page
 
     public class AppSettings
     {
-        private string? _DownloadFolderPath;
-        public string? DownloadFolderPath
-        {
-            get => _DownloadFolderPath;
-            set => _DownloadFolderPath = value?.Trim();
-        }
+        public string? DownloadFolderPath { get; set; }
+        public string? AdditionalArguments { get; set; }
     }
 
     private AppSettings settings = new();
@@ -60,7 +56,9 @@ public sealed partial class HomePage : Page
             downloadFolder = await StorageFolder.GetFolderFromPathAsync(settings.DownloadFolderPath);
         }
         PickDestinationOutputTextBlock.Text = downloadFolder.Path;
+        AdditionalArgumentsTextBox.Text = settings.AdditionalArguments;
     }
+
     private async void Page_Unloaded(object sender, RoutedEventArgs e)
     {
         // Save settings when the page is unloaded
@@ -117,7 +115,7 @@ public sealed partial class HomePage : Page
         DownloadProgressBar.Value = 0;
         DownloadProgressBar.Visibility = Visibility.Visible;
 
-        string arguments = ((downloadFolder.Path != "") ? ("-P \"" + downloadFolder.Path + "\" ") : "") + link;
+        string arguments = ((downloadFolder.Path != "") ? ("-P \"" + downloadFolder.Path + "\" ") : "") + settings.AdditionalArguments + " " + link;
 
         try
         {
@@ -213,7 +211,7 @@ public sealed partial class HomePage : Page
             while (start >= 0 && (char.IsDigit(line[start]) || line[start] == '.'))
                 start--;
             start++;
-            return line.Substring(start, percentIdx - start);
+            return line[start..percentIdx];
         }
         return null;
     }
@@ -267,6 +265,17 @@ public sealed partial class HomePage : Page
         if (e.Key == Windows.System.VirtualKey.Enter)
         {
             DownloadButton_Click(sender, e);
+        }
+    }
+
+    private async void AdditionalArgumentsTextBox_LostFocus(object sender, RoutedEventArgs e)
+    {
+        if (AdditionalArgumentsTextBox != null)
+        {
+            settings.AdditionalArguments = AdditionalArgumentsTextBox.Text?.Trim() ?? string.Empty;
+            SavingSettingsProgressRing.IsActive = true;
+            await SaveSettingsAsync();
+            SavingSettingsProgressRing.IsActive = false;
         }
     }
 }
