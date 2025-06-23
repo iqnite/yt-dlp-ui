@@ -34,6 +34,7 @@ public sealed partial class HomePage : Page
     private const string SettingsFileName = "settings.json";
     private StorageFolder downloadFolder = ApplicationData.Current.LocalFolder;
     private string exePath = Path.Combine(AppContext.BaseDirectory, "yt-dlp", "yt-dlp.exe");
+    private bool busy = false;
 
     // Define your settings structure
     public class AppSettings
@@ -94,6 +95,8 @@ public sealed partial class HomePage : Page
 
     private async void DownloadButton_Click(object sender, RoutedEventArgs e)
     {
+        if (busy) return;
+        busy = true;
         string link = LinkTextBox.Text.Trim();
         if (string.IsNullOrEmpty(link)) return;
         DownloadStatusInfoBar.IsOpen = false;
@@ -180,6 +183,7 @@ public sealed partial class HomePage : Page
             DownloadProgressBar.Visibility = Visibility.Collapsed;
             DownloadButton.Content = "Download";
             DownloadButton.IsEnabled = true;
+            busy = false;
             BadgeNotificationManager.Current.ClearBadge();
         }
     }
