@@ -14,6 +14,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
@@ -26,12 +27,14 @@ using Windows.Storage.Pickers;
 
 namespace YT_DLP_UI;
 
-public sealed partial class HomePage : Page
+public sealed partial class HomePage : Page, IDisposable
 {
     private const string SettingsFileName = "settings.json";
     private StorageFolder downloadFolder = ApplicationData.Current.LocalFolder;
-    private string exePath = Path.Combine(AppContext.BaseDirectory, "yt-dlp", "yt-dlp.exe");
+    private readonly string exePath = Path.Combine(AppContext.BaseDirectory, "yt-dlp", "yt-dlp.exe");
+    private readonly string ffmpegPath = Path.Combine(AppContext.BaseDirectory, "ffmpeg", "ffmpeg-master-latest-win32-gpl", "bin", "ffmpeg.exe");
     private bool busy = false;
+    private readonly SemaphoreSlim _settingsLock = new SemaphoreSlim(1, 1);
 
     public class AppSettings
     {
@@ -115,7 +118,10 @@ public sealed partial class HomePage : Page
         DownloadProgressBar.Value = 0;
         DownloadProgressBar.Visibility = Visibility.Visible;
 
-        string arguments = ((downloadFolder.Path != "") ? ("-P \"" + downloadFolder.Path + "\" ") : "") + settings.AdditionalArguments + " " + link;
+        string arguments = $"{(downloadFolder.Path != "" ? $"-P \"{downloadFolder.Path}\"" : "")}"
+            + $" --ffmpeg-location {ffmpegPath} "
+            + settings.AdditionalArguments + " "
+            + link;
 
         try
         {
@@ -240,23 +246,114 @@ public sealed partial class HomePage : Page
 
     private async Task SaveSettingsAsync()
     {
-        var file = await ApplicationData.Current.LocalFolder.CreateFileAsync(
-            SettingsFileName, CreationCollisionOption.ReplaceExisting);
-        string json = JsonSerializer.Serialize(settings);
-        await FileIO.WriteTextAsync(file, json);
+        try
+        {
+            // Use a semaphore to prevent concurrent access to settings file
+            await _settingsLock.WaitAsync();
+
+            if (settings == null)
+            {
+                settings = new AppSettings();
+            }
+
+            settings.DownloadFolderPath ??= string.Empty;
+            settings.AdditionalArguments ??= string.Empty;
+
+            var options = new JsonSerializerOptions
+            {
+                WriteIndented = true
+            };
+
+            string json = JsonSerializer.Serialize(settings, options);
+
+            if (string.IsNullOrWhiteSpace(json) || json == "{}" || json == "null")
+            {
+                Debug.WriteLine("WARNING: Attempted to save empty settings, operation aborted");
+                return;
+            }
+
+            var tempFileName = SettingsFileName + ".temp";
+            var tempFile = await ApplicationData.Current.LocalFolder.CreateFileAsync(
+                tempFileName, CreationCollisionOption.ReplaceExisting);
+            await FileIO.WriteTextAsync(tempFile, json);
+            string verificationJson = await FileIO.ReadTextAsync(tempFile);
+            if (string.IsNullOrWhiteSpace(verificationJson))
+            {
+                Debug.WriteLine("ERROR: Settings verification failed - temp file is empty");
+                return;
+            }
+
+            StorageFile actualFile;
+            try
+            {
+                actualFile = await ApplicationData.Current.LocalFolder.GetFileAsync(SettingsFileName);
+            }
+            catch
+            {
+                actualFile = await ApplicationData.Current.LocalFolder.CreateFileAsync(
+                    SettingsFileName, CreationCollisionOption.ReplaceExisting);
+            }
+
+            await tempFile.CopyAndReplaceAsync(actualFile);
+            await tempFile.DeleteAsync();
+            Debug.WriteLine("Settings saved successfully");
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"ERROR saving settings: {ex.Message}");
+        }
+        finally
+        {
+            _settingsLock.Release();
+        }
     }
 
     private async Task LoadSettingsAsync()
     {
         try
         {
+            await _settingsLock.WaitAsync();
+
             var file = await ApplicationData.Current.LocalFolder.GetFileAsync(SettingsFileName);
             string json = await FileIO.ReadTextAsync(file);
-            settings = JsonSerializer.Deserialize<AppSettings>(json) ?? new AppSettings();
+
+            if (string.IsNullOrWhiteSpace(json))
+            {
+                Debug.WriteLine("WARNING: Settings file exists but is empty, using defaults");
+                settings = new AppSettings();
+                return;
+            }
+
+            var loadedSettings = JsonSerializer.Deserialize<AppSettings>(json);
+            if (loadedSettings != null)
+            {
+                settings = loadedSettings;
+
+                // Ensure no null values
+                settings.DownloadFolderPath ??= string.Empty;
+                settings.AdditionalArguments ??= string.Empty;
+
+                Debug.WriteLine("Settings loaded successfully");
+            }
+            else
+            {
+                Debug.WriteLine("WARNING: Failed to deserialize settings, using defaults");
+                settings = new AppSettings();
+            }
         }
-        catch
+        catch (FileNotFoundException)
         {
-            settings = new AppSettings(); // Use defaults if file doesn't exist
+            Debug.WriteLine("Settings file not found, using defaults");
+            settings = new AppSettings();
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"ERROR loading settings: {ex.Message}");
+            settings = new AppSettings(); // Use defaults on any error
+        }
+        finally
+        {
+            _settingsLock.Release();
         }
     }
 
@@ -277,5 +374,10 @@ public sealed partial class HomePage : Page
             await SaveSettingsAsync();
             SavingSettingsProgressRing.IsActive = false;
         }
+    }
+
+    public void Dispose()
+    {
+        _settingsLock?.Dispose();
     }
 }
