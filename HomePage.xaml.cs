@@ -56,7 +56,7 @@ public sealed partial class HomePage : Page
         {
             downloadFolder = await StorageFolder.GetFolderFromPathAsync(settings.DownloadFolderPath);
         }
-        PickDestinationOutputTextBlock.Text = "Files will be saved to \"" + downloadFolder.Path + "\"";
+        PickDestinationOutputTextBlock.Text = downloadFolder.Path;
     }
 
     private async void PickDestinationButton_Click(object sender, RoutedEventArgs e)
@@ -64,7 +64,6 @@ public sealed partial class HomePage : Page
         //disable the button to avoid double-clicking
         var senderButton = sender as Button;
         if (senderButton != null) senderButton.IsEnabled = false;
-        PickDestinationOutputTextBlock.Text = "";
 
         FolderPicker downloadFolderPicker = new()
         {
@@ -85,11 +84,7 @@ public sealed partial class HomePage : Page
             settings.DownloadFolderPath = folder.Path;
             await SaveSettingsAsync();
             StorageApplicationPermissions.FutureAccessList.AddOrReplace("PickedFolderToken", folder);
-            PickDestinationOutputTextBlock.Text = "Files will be saved to \"" + downloadFolder.Path + "\"";
-        }
-        else
-        {
-            PickDestinationOutputTextBlock.Text = "Operation cancelled.";
+            PickDestinationOutputTextBlock.Text = downloadFolder.Path;
         }
 
         //re-enable the button
@@ -164,7 +159,6 @@ public sealed partial class HomePage : Page
             {
                 DownloadStatusInfoBar.Severity = InfoBarSeverity.Success;
                 DownloadStatusInfoBar.Message = "Download completed successfully!";
-                OpenDownloadButton.NavigateUri = new Uri("file:///" + downloadFolder.Path);
                 OpenDownloadButton.Visibility = Visibility.Visible;
                 DownloadStatusInfoBar.IsOpen = true;
             }
