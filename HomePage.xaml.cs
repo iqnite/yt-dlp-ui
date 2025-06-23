@@ -34,12 +34,13 @@ public sealed partial class HomePage : Page, IDisposable
     private readonly string exePath = Path.Combine(AppContext.BaseDirectory, "yt-dlp", "yt-dlp.exe");
     private readonly string ffmpegPath = Path.Combine(AppContext.BaseDirectory, "ffmpeg", "ffmpeg-master-latest-win32-gpl", "bin", "ffmpeg.exe");
     private bool busy = false;
-    private readonly SemaphoreSlim _settingsLock = new SemaphoreSlim(1, 1);
+    private readonly SemaphoreSlim _settingsLock = new(1, 1);
 
     public class AppSettings
     {
         public string? DownloadFolderPath { get; set; }
         public string? AdditionalArguments { get; set; }
+        public string? Format { get; set; }
     }
 
     private AppSettings settings = new();
@@ -59,7 +60,10 @@ public sealed partial class HomePage : Page, IDisposable
             downloadFolder = await StorageFolder.GetFolderFromPathAsync(settings.DownloadFolderPath);
         }
         PickDestinationOutputTextBlock.Text = downloadFolder.Path;
+        settings.AdditionalArguments ??= "";
         AdditionalArgumentsTextBox.Text = settings.AdditionalArguments;
+        settings.Format ??= "MP4";
+        FormatComboBox.Text = settings.Format;
     }
 
     private async void Page_Unloaded(object sender, RoutedEventArgs e)
@@ -120,6 +124,7 @@ public sealed partial class HomePage : Page, IDisposable
 
         string arguments = $"{(downloadFolder.Path != "" ? $"-P \"{downloadFolder.Path}\"" : "")}"
             + $" --ffmpeg-location {ffmpegPath} "
+            + $" -t {settings.Format?.ToLower() ?? "mp4"} "
             + settings.AdditionalArguments + " "
             + link;
 
@@ -251,18 +256,15 @@ public sealed partial class HomePage : Page, IDisposable
             // Use a semaphore to prevent concurrent access to settings file
             await _settingsLock.WaitAsync();
 
-            if (settings == null)
-            {
-                settings = new AppSettings();
-            }
-
+            settings ??= new AppSettings();
             settings.DownloadFolderPath ??= string.Empty;
             settings.AdditionalArguments ??= string.Empty;
 
-            var options = new JsonSerializerOptions
+            JsonSerializerOptions jsonSerializerOptions = new()
             {
                 WriteIndented = true
             };
+            var options = jsonSerializerOptions;
 
             string json = JsonSerializer.Serialize(settings, options);
 
@@ -369,8 +371,8 @@ public sealed partial class HomePage : Page, IDisposable
     {
         if (AdditionalArgumentsTextBox != null)
         {
-            settings.AdditionalArguments = AdditionalArgumentsTextBox.Text?.Trim() ?? string.Empty;
             SavingSettingsProgressRing.IsActive = true;
+            settings.AdditionalArguments = AdditionalArgumentsTextBox.Text?.Trim() ?? string.Empty;
             await SaveSettingsAsync();
             SavingSettingsProgressRing.IsActive = false;
         }
@@ -379,5 +381,13 @@ public sealed partial class HomePage : Page, IDisposable
     public void Dispose()
     {
         _settingsLock?.Dispose();
+    }
+
+    private async void FormatComboBox_SelectionChanged(object _, object __)
+    {
+        SavingSettingsProgressRing.IsActive = true;
+        settings.Format = FormatComboBox.Text;
+        await SaveSettingsAsync();
+        SavingSettingsProgressRing.IsActive = false;
     }
 }

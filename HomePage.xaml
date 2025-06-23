@@ -95,8 +95,40 @@
                 </Grid>
             </Border>
 
+            <Border Padding="12"
+                    CornerRadius="8"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                <Grid ColumnSpacing="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <FontIcon Glyph="&#xEA69;"
+                              FontSize="24"
+                              VerticalAlignment="Center"/>
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="Format"
+                                   FontWeight="Medium"
+                                   FontSize="16"/>
+                        <TextBlock Text="The file format the downloaded video will be saved as."
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   FontSize="12"/>
+                    </StackPanel>
+                    <ComboBox x:Name="FormatComboBox"
+                              SelectionChanged="FormatComboBox_SelectionChanged"
+                              IsEditable="True"
+                              Grid.Column="2"
+                              VerticalAlignment="Center">
+                        <x:String>MP4</x:String>
+                        <x:String>MP3</x:String>
+                    </ComboBox>
+                </Grid>
+            </Border>
+
             <Expander HorizontalAlignment="Stretch"
-                    Padding="12">
+                      Padding="12">
                 <Expander.Header>
                     <Grid ColumnSpacing="12">
                         <Grid.ColumnDefinitions>
@@ -112,7 +144,7 @@
                                        FontWeight="Medium"
                                        FontSize="16"/>
                             <TextBlock FontSize="12"
-                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}">
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}">
                                 <Run Text="Settings intended for advanced users. See the"/>
                                 <Hyperlink NavigateUri="https://github.com/yt-dlp/yt-dlp#usage-and-options"
                                            Foreground="{ThemeResource AccentFillColorDefaultBrush}">
@@ -130,7 +162,7 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="Additional command arguments"
-                                Grid.Column="0"/>
+                                   Grid.Column="0"/>
                         <TextBox x:Name="AdditionalArgumentsTextBox"
                                  HorizontalAlignment="Stretch"
                                  VerticalAlignment="Stretch"
