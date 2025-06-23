@@ -132,6 +132,8 @@ public sealed partial class HomePage : Page
                 CreateNoWindow = true
             };
 
+            string errorOutput = string.Empty;
+
             using var downloadProcess = new Process { StartInfo = psi, EnableRaisingEvents = true };
             downloadProcess.OutputDataReceived += (s, ea) =>
             {
@@ -153,7 +155,13 @@ public sealed partial class HomePage : Page
                     }
                 }
             };
-            downloadProcess.ErrorDataReceived += (s, ea) => { /* Optionally handle errors */ };
+            downloadProcess.ErrorDataReceived += (s, ea) =>
+            {
+                if (!string.IsNullOrEmpty(ea.Data))
+                {
+                    errorOutput += ea.Data + "\n";
+                }
+            };
             downloadProcess.Exited += (s, ea) =>
             {
                 tcs.TrySetResult(downloadProcess.ExitCode);
@@ -175,7 +183,7 @@ public sealed partial class HomePage : Page
             else
             {
                 DownloadStatusInfoBar.Severity = InfoBarSeverity.Error;
-                DownloadStatusInfoBar.Message = "Download failed: " + exitCode;
+                DownloadStatusInfoBar.Message = string.IsNullOrWhiteSpace(errorOutput) ? "An error occurred. Please try again." : errorOutput.Trim();
                 DownloadStatusInfoBar.IsOpen = true;
             }
         }
