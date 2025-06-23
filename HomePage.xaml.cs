@@ -5,6 +5,7 @@ using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
+using Microsoft.Windows.BadgeNotifications;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -105,6 +106,7 @@ public sealed partial class HomePage : Page
         DownloadButton.IsEnabled = false;
         DownloadButton.Content = "Downloading...";
         DownloadProgressBar.IsIndeterminate = true;
+        BadgeNotificationManager.Current.SetBadgeAsGlyph(BadgeNotificationGlyph.Activity);
         DownloadProgressBar.Minimum = 0;
         DownloadProgressBar.Maximum = 100;
         DownloadProgressBar.Value = 0;
@@ -184,6 +186,7 @@ public sealed partial class HomePage : Page
             DownloadProgressBar.Visibility = Visibility.Collapsed;
             DownloadButton.Content = "Download";
             DownloadButton.IsEnabled = true;
+            BadgeNotificationManager.Current.ClearBadge();
         }
     }
 
