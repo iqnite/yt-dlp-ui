@@ -123,8 +123,8 @@ public sealed partial class HomePage : Page, IDisposable
         DownloadProgressBar.Visibility = Visibility.Visible;
 
         string arguments = $"{(downloadFolder.Path != "" ? $"-P \"{downloadFolder.Path}\"" : "")}"
-            + $" --ffmpeg-location {ffmpegPath} "
-            + $" -t {settings.Format?.ToLower() ?? "mp4"} "
+            + $" --ffmpeg-location \"{ffmpegPath}\" "
+            + $" -t \"{(string.IsNullOrEmpty(settings.Format) ? "mp4" : settings.Format.ToLower())}\" "
             + settings.AdditionalArguments + " "
             + link;
 
