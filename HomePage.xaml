@@ -25,7 +25,11 @@
             <TextBlock x:Name="PickDestinationOutputTextBlock" Text="No folder selected" TextWrapping="Wrap" Padding="20,5,0,0"/>
             <Button x:Name="DownloadButton" Content="Download" Style="{StaticResource AccentButtonStyle}" Click="DownloadButton_Click"/>
             <ProgressBar x:Name="DownloadProgressBar" Visibility="Collapsed" IsIndeterminate="True" ShowPaused="False" ShowError="False" />
-            <InfoBar x:Name="DownloadStatusInfoBar" IsOpen="False"/>
+            <InfoBar x:Name="DownloadStatusInfoBar" IsOpen="False">
+                <InfoBar.ActionButton>
+                    <HyperlinkButton x:Name="OpenDownloadButton" Content="View" Visibility="Collapsed" Click="OpenDownloadButton_Click" />
+                </InfoBar.ActionButton>
+            </InfoBar>
         </StackPanel>
     </Grid>
 </Page>

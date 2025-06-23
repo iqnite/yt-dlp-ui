@@ -30,7 +30,7 @@ namespace YT_DLP_UI;
 public sealed partial class HomePage : Page
 {
     private StorageFolder settingsFolder = ApplicationData.Current.LocalFolder;
-    private StorageFolder downloadFolder = KnownFolders.VideosLibrary;
+    private StorageFolder downloadFolder = ApplicationData.Current.LocalFolder;
     private string exePath = Path.Combine(AppContext.BaseDirectory, "yt-dlp", "yt-dlp.exe");
 
     public HomePage()
@@ -82,29 +82,70 @@ public sealed partial class HomePage : Page
     {
         string link = LinkTextBox.Text.Trim();
         if (string.IsNullOrEmpty(link)) return;
-        DownloadProgressBar.Visibility = Visibility.Visible;
+        DownloadStatusInfoBar.IsOpen = false;
+        OpenDownloadButton.Visibility = Visibility.Collapsed;
         DownloadButton.IsEnabled = false;
+        DownloadButton.Content = "Downloading...";
+        DownloadProgressBar.IsIndeterminate = true;
+        DownloadProgressBar.Minimum = 0;
+        DownloadProgressBar.Maximum = 100;
+        DownloadProgressBar.Value = 0;
+        DownloadProgressBar.Visibility = Visibility.Visible;
+
+        string arguments = ((downloadFolder.Path != "") ? ("-P \"" + downloadFolder.Path + "\" ") : "") + link;
 
         try
         {
-            int? exitCode = await Task.Run(() =>
+            var tcs = new TaskCompletionSource<int?>();
+            var psi = new ProcessStartInfo
             {
-                using var downloadProcess = Process.Start(new ProcessStartInfo
+                FileName = exePath,
+                Arguments = arguments,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+
+            using var downloadProcess = new Process { StartInfo = psi, EnableRaisingEvents = true };
+            downloadProcess.OutputDataReceived += (s, ea) =>
+            {
+                if (ea.Data != null)
                 {
-                    FileName = exePath,
-                    Arguments = "-P " + downloadFolder.Path + " " + link,
-                    RedirectStandardOutput = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = true
-                });
-                downloadProcess?.WaitForExit();
-                return downloadProcess?.ExitCode;
-            });
+                    // Example: [download]  42.3% of   13.48MiB in 00:00:04 at 2.86MiB/s
+                    var line = ea.Data;
+                    if (line.StartsWith("[download]"))
+                    {
+                        var percentStr = ExtractPercentage(line);
+                        if (percentStr != null && double.TryParse(percentStr, out double percent))
+                        {
+                            _ = DispatcherQueue.TryEnqueue(() =>
+                            {
+                                DownloadProgressBar.IsIndeterminate = false;
+                                DownloadProgressBar.Value = percent;
+                            });
+                        }
+                    }
+                }
+            };
+            downloadProcess.ErrorDataReceived += (s, ea) => { /* Optionally handle errors */ };
+            downloadProcess.Exited += (s, ea) =>
+            {
+                tcs.TrySetResult(downloadProcess.ExitCode);
+            };
+
+            downloadProcess.Start();
+            downloadProcess.BeginOutputReadLine();
+            downloadProcess.BeginErrorReadLine();
+
+            int? exitCode = await tcs.Task;
 
             if (exitCode == 0)
             {
                 DownloadStatusInfoBar.Severity = InfoBarSeverity.Success;
                 DownloadStatusInfoBar.Message = "Download completed successfully!";
+                OpenDownloadButton.NavigateUri = new Uri("file:///" + downloadFolder.Path);
+                OpenDownloadButton.Visibility = Visibility.Visible;
                 DownloadStatusInfoBar.IsOpen = true;
             }
             else
@@ -123,7 +164,45 @@ public sealed partial class HomePage : Page
         finally
         {
             DownloadProgressBar.Visibility = Visibility.Collapsed;
+            DownloadButton.Content = "Download";
             DownloadButton.IsEnabled = true;
+        }
+    }
+
+    private static string? ExtractPercentage(string line)
+    {
+        // Looks for a percentage in the format: [download]  42.3% ...
+        int percentIdx = line.IndexOf('%');
+        if (percentIdx > 0)
+        {
+            int start = percentIdx - 1;
+            while (start >= 0 && (char.IsDigit(line[start]) || line[start] == '.'))
+                start--;
+            start++;
+            return line.Substring(start, percentIdx - start);
+        }
+        return null;
+    }
+
+    private void OpenDownloadButton_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var folderPath = downloadFolder.Path;
+            if (!string.IsNullOrEmpty(folderPath) && Directory.Exists(folderPath))
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = folderPath,
+                    UseShellExecute = true
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            DownloadStatusInfoBar.Severity = InfoBarSeverity.Error;
+            DownloadStatusInfoBar.Message = "Failed to open folder: " + ex.Message;
+            DownloadStatusInfoBar.IsOpen = true;
         }
     }
 }
