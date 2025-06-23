@@ -31,7 +31,7 @@
                          AcceptsReturn="False"
                          TextWrapping="NoWrap"
                          PlaceholderText="https://youtu.be/..."
-                         KeyUp="DownloadButton_Click"
+                         KeyUp="LinkTextBox_KeyUp"
                          HorizontalAlignment="Stretch"
                          Margin="4"
                          Grid.Column="0"/>

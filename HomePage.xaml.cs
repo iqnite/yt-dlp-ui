@@ -26,9 +26,6 @@ using Windows.Storage.Pickers;
 
 namespace YT_DLP_UI;
 
-/// <summary>
-/// An empty page that can be used on its own or navigated to within a Frame.
-/// </summary>
 public sealed partial class HomePage : Page
 {
     private const string SettingsFileName = "settings.json";
@@ -36,10 +33,14 @@ public sealed partial class HomePage : Page
     private string exePath = Path.Combine(AppContext.BaseDirectory, "yt-dlp", "yt-dlp.exe");
     private bool busy = false;
 
-    // Define your settings structure
     public class AppSettings
     {
-        public string? DownloadFolderPath { get; set; }
+        private string? _DownloadFolderPath;
+        public string? DownloadFolderPath
+        {
+            get => _DownloadFolderPath;
+            set => _DownloadFolderPath = value?.Trim();
+        }
     }
 
     private AppSettings settings = new();
@@ -48,6 +49,7 @@ public sealed partial class HomePage : Page
     {
         InitializeComponent();
         Loaded += HomePage_Loaded;
+        Unloaded += Page_Unloaded;
     }
 
     private async void HomePage_Loaded(object sender, RoutedEventArgs e)
@@ -58,6 +60,11 @@ public sealed partial class HomePage : Page
             downloadFolder = await StorageFolder.GetFolderFromPathAsync(settings.DownloadFolderPath);
         }
         PickDestinationOutputTextBlock.Text = downloadFolder.Path;
+    }
+    private async void Page_Unloaded(object sender, RoutedEventArgs e)
+    {
+        // Save settings when the page is unloaded
+        await SaveSettingsAsync();
     }
 
     private async void PickDestinationButton_Click(object sender, RoutedEventArgs e)
@@ -168,7 +175,7 @@ public sealed partial class HomePage : Page
             else
             {
                 DownloadStatusInfoBar.Severity = InfoBarSeverity.Error;
-                DownloadStatusInfoBar.Message = "Download failed with exit code: " + exitCode + "\nCheck the link and try again.";
+                DownloadStatusInfoBar.Message = "Download failed: " + exitCode;
                 DownloadStatusInfoBar.IsOpen = true;
             }
         }
@@ -244,6 +251,14 @@ public sealed partial class HomePage : Page
         catch
         {
             settings = new AppSettings(); // Use defaults if file doesn't exist
+        }
+    }
+
+    private void LinkTextBox_KeyUp(object sender, KeyRoutedEventArgs e)
+    {
+        if (e.Key == Windows.System.VirtualKey.Enter)
+        {
+            DownloadButton_Click(sender, e);
         }
     }
 }
