@@ -12,6 +12,7 @@ using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
@@ -29,9 +30,17 @@ namespace YT_DLP_UI;
 /// </summary>
 public sealed partial class HomePage : Page
 {
-    private StorageFolder settingsFolder = ApplicationData.Current.LocalFolder;
+    private const string SettingsFileName = "settings.json";
     private StorageFolder downloadFolder = ApplicationData.Current.LocalFolder;
     private string exePath = Path.Combine(AppContext.BaseDirectory, "yt-dlp", "yt-dlp.exe");
+
+    // Define your settings structure
+    public class AppSettings
+    {
+        public string? DownloadFolderPath { get; set; }
+    }
+
+    private AppSettings settings = new();
 
     public HomePage()
     {
@@ -39,9 +48,14 @@ public sealed partial class HomePage : Page
         Loaded += HomePage_Loaded;
     }
 
-    private void HomePage_Loaded(object sender, RoutedEventArgs e)
+    private async void HomePage_Loaded(object sender, RoutedEventArgs e)
     {
-        PickDestinationOutputTextBlock.Text = "Please select a destination folder";
+        await LoadSettingsAsync();
+        if (!string.IsNullOrEmpty(settings.DownloadFolderPath) && Directory.Exists(settings.DownloadFolderPath))
+        {
+            downloadFolder = await StorageFolder.GetFolderFromPathAsync(settings.DownloadFolderPath);
+        }
+        PickDestinationOutputTextBlock.Text = "Files will be saved to \"" + downloadFolder.Path + "\"";
     }
 
     private async void PickDestinationButton_Click(object sender, RoutedEventArgs e)
@@ -63,9 +77,12 @@ public sealed partial class HomePage : Page
 
         // Open the picker for the user to pick a folder
         StorageFolder folder = await downloadFolderPicker.PickSingleFolderAsync();
+        SavingSettingsProgressRing.IsActive = true;
         if (folder != null)
         {
             downloadFolder = folder;
+            settings.DownloadFolderPath = folder.Path;
+            await SaveSettingsAsync();
             StorageApplicationPermissions.FutureAccessList.AddOrReplace("PickedFolderToken", folder);
             PickDestinationOutputTextBlock.Text = "Files will be saved to \"" + downloadFolder.Path + "\"";
         }
@@ -76,6 +93,7 @@ public sealed partial class HomePage : Page
 
         //re-enable the button
         if (senderButton != null) senderButton.IsEnabled = true;
+        SavingSettingsProgressRing.IsActive = false;
     }
 
     private async void DownloadButton_Click(object sender, RoutedEventArgs e)
@@ -203,6 +221,28 @@ public sealed partial class HomePage : Page
             DownloadStatusInfoBar.Severity = InfoBarSeverity.Error;
             DownloadStatusInfoBar.Message = "Failed to open folder: " + ex.Message;
             DownloadStatusInfoBar.IsOpen = true;
+        }
+    }
+
+    private async Task SaveSettingsAsync()
+    {
+        var file = await ApplicationData.Current.LocalFolder.CreateFileAsync(
+            SettingsFileName, CreationCollisionOption.ReplaceExisting);
+        string json = JsonSerializer.Serialize(settings);
+        await FileIO.WriteTextAsync(file, json);
+    }
+
+    private async Task LoadSettingsAsync()
+    {
+        try
+        {
+            var file = await ApplicationData.Current.LocalFolder.GetFileAsync(SettingsFileName);
+            string json = await FileIO.ReadTextAsync(file);
+            settings = JsonSerializer.Deserialize<AppSettings>(json) ?? new AppSettings();
+        }
+        catch
+        {
+            settings = new AppSettings(); // Use defaults if file doesn't exist
         }
     }
 }
