@@ -7,7 +7,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Title="Wyder - YouTube Downloader">
+    Title="Wyder Video Downloader">
 
     <Window.SystemBackdrop>
         <MicaBackdrop />
@@ -22,9 +22,9 @@
         </Grid.RowDefinitions>
 
             <TitleBar x:Name="AppTitleBar"
-              Title="YouTube Downloader">
+              Title="Wyder Video Downloader">
             <TitleBar.IconSource>
-                <FontIconSource Glyph="&#xEBD3;"/>
+                <ImageIconSource ImageSource="/Assets/wyder.svg"/>
             </TitleBar.IconSource>
         </TitleBar>
 
