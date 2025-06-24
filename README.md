@@ -1,3 +1,3 @@
 # Wyder
 
-An easy-to-use YouTube downloader for Windows based on yt-dlp.
+An easy-to-use video downloader for Windows based on yt-dlp.
