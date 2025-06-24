@@ -108,9 +108,9 @@ public sealed partial class HomePage : Page, IDisposable
     private async void DownloadButton_Click(object sender, RoutedEventArgs e)
     {
         if (busy) return;
-        busy = true;
         string link = LinkTextBox.Text.Trim();
         if (string.IsNullOrEmpty(link)) return;
+        busy = true;
         DownloadStatusInfoBar.IsOpen = false;
         OpenDownloadButton.Visibility = Visibility.Collapsed;
         DownloadButton.IsEnabled = false;
