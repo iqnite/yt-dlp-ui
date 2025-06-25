@@ -14,6 +14,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.Foundation;
@@ -43,6 +44,49 @@ public sealed partial class HomePage : Page, IDisposable
         public string? Format { get; set; }
     }
 
+    public class DownloadProgress
+    {
+        public double Percentage = 0.0;
+        public int PlaylistItem = 1;
+        public int PlaylistTotal = 1;
+        private double ExtractedProgress = 0.0;
+
+        public void ExtractPercentage(string line)
+        {
+            // Looks for a Percentage in the format: [download]  42.3% ...
+            Regex regex = DownloadPercentageRegex();
+            Match match = regex.Match(line);
+            if (!match.Success) return;
+            if (!double.TryParse(match.Groups[1].Value, out double newPercentage)) return;
+            if (newPercentage > 100) return;
+            Percentage = newPercentage;
+        }
+
+        public void ExtractPlaylistItems(string line)
+        {
+            // Looks for playlist item/total in the format: [download] Downloading 1 of 8
+            int prevPlaylistItem = PlaylistItem;
+            Regex regex = PlaylistItemsRegex();
+            Match match = regex.Match(line);
+            if (!match.Success) return;
+            if (!int.TryParse(match.Groups[1].Value, out PlaylistItem)) return;
+            if (!int.TryParse(match.Groups[2].Value, out PlaylistTotal)) return;
+            if (PlaylistItem > prevPlaylistItem) Percentage = 0;
+        }
+
+        public double ExtractProgress(string line)
+        {
+            double prevProgress = ExtractedProgress;
+            ExtractPercentage(line);
+            ExtractPlaylistItems(line);
+
+            Debug.WriteLine($"{PlaylistItem} of {PlaylistTotal}, {Percentage}%");
+            double newProgress = (PlaylistItem - 1 + Percentage / 100) / PlaylistTotal * 100;
+            if (newProgress > prevProgress) ExtractedProgress = newProgress;
+            return ExtractedProgress;
+        }
+    }
+
     private AppSettings settings = new();
 
     public HomePage()
@@ -64,12 +108,14 @@ public sealed partial class HomePage : Page, IDisposable
         AdditionalArgumentsTextBox.Text = settings.AdditionalArguments;
         settings.Format ??= "MP4";
         FormatComboBox.Text = settings.Format;
+        BadgeNotificationManager.Current.SetBadgeAsGlyph(BadgeNotificationGlyph.None);
     }
 
     private async void Page_Unloaded(object sender, RoutedEventArgs e)
     {
         // Save settings when the page is unloaded
         await SaveSettingsAsync();
+        BadgeNotificationManager.Current.SetBadgeAsGlyph(BadgeNotificationGlyph.None);
     }
 
     private async void PickDestinationButton_Click(object sender, RoutedEventArgs e)
@@ -128,6 +174,8 @@ public sealed partial class HomePage : Page, IDisposable
             + settings.AdditionalArguments + " "
             + link;
 
+        DownloadProgress progress = new();
+
         try
         {
             var tcs = new TaskCompletionSource<int?>();
@@ -138,12 +186,12 @@ public sealed partial class HomePage : Page, IDisposable
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
-                CreateNoWindow = true
+                CreateNoWindow = true,
             };
 
             string errorOutput = string.Empty;
 
-            using var downloadProcess = new Process { StartInfo = psi, EnableRaisingEvents = true };
+            using Process downloadProcess = new() { StartInfo = psi, EnableRaisingEvents = true };
             downloadProcess.OutputDataReceived += (s, ea) =>
             {
                 if (ea.Data != null)
@@ -152,13 +200,13 @@ public sealed partial class HomePage : Page, IDisposable
                     var line = ea.Data;
                     if (line.StartsWith("[download]"))
                     {
-                        var percentStr = ExtractPercentage(line);
-                        if (percentStr != null && double.TryParse(percentStr, out double percent))
+                        var percent = progress.ExtractProgress(line);
+                        if (percent != 0.0)
                         {
                             _ = DispatcherQueue.TryEnqueue(() =>
                             {
                                 DownloadProgressBar.IsIndeterminate = false;
-                                DownloadProgressBar.Value = percent;
+                                DownloadProgressBar.Value = (double)percent;
                             });
                         }
                     }
@@ -210,21 +258,6 @@ public sealed partial class HomePage : Page, IDisposable
             busy = false;
             BadgeNotificationManager.Current.ClearBadge();
         }
-    }
-
-    private static string? ExtractPercentage(string line)
-    {
-        // Looks for a percentage in the format: [download]  42.3% ...
-        int percentIdx = line.IndexOf('%');
-        if (percentIdx > 0)
-        {
-            int start = percentIdx - 1;
-            while (start >= 0 && (char.IsDigit(line[start]) || line[start] == '.'))
-                start--;
-            start++;
-            return line[start..percentIdx];
-        }
-        return null;
     }
 
     private void OpenDownloadButton_Click(object sender, RoutedEventArgs e)
@@ -390,4 +423,10 @@ public sealed partial class HomePage : Page, IDisposable
         await SaveSettingsAsync();
         SavingSettingsProgressRing.IsActive = false;
     }
+
+    [GeneratedRegex(@"(\d+.?\d*) ?%")]
+    private static partial Regex DownloadPercentageRegex();
+
+    [GeneratedRegex(@"Downloading item (\d+) of (\d+)")]
+    private static partial Regex PlaylistItemsRegex();
 }

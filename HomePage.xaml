@@ -156,19 +156,13 @@
                     </Grid>
                 </Expander.Header>
                 <Expander.Content>
-                    <Grid ColumnSpacing="12">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Text="Additional command arguments"
-                                   Grid.Column="0"/>
+                    <StackPanel Orientation="Vertical" Spacing="12">
+                        <TextBlock Text="Additional command arguments"/>
                         <TextBox x:Name="AdditionalArgumentsTextBox"
                                  HorizontalAlignment="Stretch"
                                  VerticalAlignment="Stretch"
-                                 LostFocus="AdditionalArgumentsTextBox_LostFocus"
-                                 Grid.Column="1"/>
-                    </Grid>
+                                 LostFocus="AdditionalArgumentsTextBox_LostFocus"/>
+                    </StackPanel>
                 </Expander.Content>
             </Expander>
         </StackPanel>
