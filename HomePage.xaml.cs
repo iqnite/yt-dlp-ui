@@ -17,6 +17,7 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Windows.ApplicationModel.DataTransfer;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Storage;
@@ -151,16 +152,35 @@ public sealed partial class HomePage : Page, IDisposable
         SavingSettingsProgressRing.IsActive = false;
     }
 
+    private async Task<string> Paste()
+    {
+        var package = Clipboard.GetContent();
+        if (package.Contains(StandardDataFormats.Text))
+        {
+            return await package.GetTextAsync();
+        }
+        return "";
+    }
+
     private async void DownloadButton_Click(object sender, RoutedEventArgs e)
     {
-        if (busy) return;
         string link = LinkTextBox.Text.Trim();
+        if (string.IsNullOrEmpty(link))
+        {
+            link = await Paste();
+        }
+        Download(link);
+    }
+
+    private async void Download(string link)
+    {
+        if (busy) return;
+        link = link.Trim();
         if (string.IsNullOrEmpty(link)) return;
         busy = true;
         DownloadStatusInfoBar.IsOpen = false;
         OpenDownloadButton.Visibility = Visibility.Collapsed;
-        DownloadButton.IsEnabled = false;
-        DownloadButton.Content = "Downloading...";
+        UpdateDownloadButton();
         DownloadProgressBar.IsIndeterminate = true;
         BadgeNotificationManager.Current.SetBadgeAsGlyph(BadgeNotificationGlyph.Activity);
         DownloadProgressBar.Minimum = 0;
@@ -252,10 +272,9 @@ public sealed partial class HomePage : Page, IDisposable
         }
         finally
         {
-            DownloadProgressBar.Visibility = Visibility.Collapsed;
-            DownloadButton.Content = "Download";
-            DownloadButton.IsEnabled = true;
             busy = false;
+            DownloadProgressBar.Visibility = Visibility.Collapsed;
+            UpdateDownloadButton();
             BadgeNotificationManager.Current.ClearBadge();
         }
     }
@@ -394,10 +413,19 @@ public sealed partial class HomePage : Page, IDisposable
 
     private void LinkTextBox_KeyUp(object sender, KeyRoutedEventArgs e)
     {
+        if (busy) return;
+        UpdateDownloadButton();
+
         if (e.Key == Windows.System.VirtualKey.Enter)
         {
-            DownloadButton_Click(sender, e);
+            Download(LinkTextBox.Text);
         }
+    }
+
+    private void UpdateDownloadButton()
+    {
+        DownloadButton.IsEnabled = !busy;
+        DownloadButton.Content = busy ? "Downloading..." : (string.IsNullOrEmpty(LinkTextBox.Text.Trim()) ? "Paste and Download" : "Download");
     }
 
     private async void AdditionalArgumentsTextBox_LostFocus(object sender, RoutedEventArgs e)

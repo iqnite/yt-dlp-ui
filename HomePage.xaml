@@ -36,7 +36,7 @@
                          Margin="4"
                          Grid.Column="0"/>
                 <Button x:Name="DownloadButton"
-                        Content="Download"
+                        Content="Paste and Download"
                         Style="{StaticResource AccentButtonStyle}"
                         Click="DownloadButton_Click"
                         Margin="4"
