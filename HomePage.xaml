@@ -16,7 +16,7 @@
                     VerticalAlignment="Top"
                     Grid.Row="1"
                     Grid.Column="1">
-            <TextBlock Text="Enter a YouTube video, playlist, or channel link"
+            <TextBlock Text="Enter a video, song, playlist, or channel link"
                        FontWeight="Medium"
                        FontSize="16"/>
             <Grid>

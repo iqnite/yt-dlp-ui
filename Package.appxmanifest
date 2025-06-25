@@ -16,7 +16,7 @@
     PhonePublisherId="00000000-0000-0000-0000-000000000000" />
 
   <Properties>
-    <DisplayName>Wyder - YouTube Downloader</DisplayName>
+    <DisplayName>Wyder Video Downloader</DisplayName>
     <PublisherDisplayName>IQBit</PublisherDisplayName>
     <Logo>Assets\wyder.png</Logo>
   </Properties>
@@ -37,8 +37,8 @@
       Executable="$targetnametoken$.exe"
       EntryPoint="$targetentrypoint$">
       <uap:VisualElements
-        DisplayName="Wyder - YouTube Downloader"
-        Description="An easy-to-use YouTube downloader based on yt-dlp."
+        DisplayName="Wyder Video Downloader"
+        Description="An easy-to-use video downloader based on yt-dlp."
         BackgroundColor="transparent"
         Square150x150Logo="Assets\wyder.png"
         Square44x44Logo="Assets\wyder.png">
