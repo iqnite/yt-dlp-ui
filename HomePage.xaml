@@ -87,11 +87,10 @@
                                    FontSize="12"/>
                     </StackPanel>
                     <Button x:Name="PickDestinationButton"
+                            Content="Change folder"
                             Click="PickDestinationButton_Click"
                             Grid.Column="2"
-                            VerticalAlignment="Center">
-                        <FontIcon Glyph="&#xE70F;"/>
-                    </Button>
+                            VerticalAlignment="Center"/>
                 </Grid>
             </Border>
 
