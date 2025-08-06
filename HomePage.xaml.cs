@@ -1,4 +1,5 @@
-﻿using Microsoft.UI.Xaml;
+﻿using ABI.Windows.ApplicationModel.Activation;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Data;
@@ -40,9 +41,12 @@ public sealed partial class HomePage : Page, IDisposable
 
     public class AppSettings
     {
+        public bool Loaded { get; set; } = false;
         public string? DownloadFolderPath { get; set; }
-        public string? AdditionalArguments { get; set; }
-        public string? Format { get; set; }
+        public string AdditionalArguments { get; set; } = "";
+        public string Format { get; set; } = "mp4";
+        public bool AutoUpdateYTDLP { get; set; } = true;
+        public bool UseBundledFFMPEG { get; set; } = true;
     }
 
     public class DownloadProgress
@@ -94,7 +98,6 @@ public sealed partial class HomePage : Page, IDisposable
     {
         InitializeComponent();
         Loaded += HomePage_Loaded;
-        Unloaded += Page_Unloaded;
     }
 
     private async void HomePage_Loaded(object sender, RoutedEventArgs e)
@@ -105,17 +108,10 @@ public sealed partial class HomePage : Page, IDisposable
             downloadFolder = await StorageFolder.GetFolderFromPathAsync(settings.DownloadFolderPath);
         }
         PickDestinationOutputTextBlock.Text = downloadFolder.Path;
-        settings.AdditionalArguments ??= "";
+        FormatComboBox.SelectedItem = settings.Format;
         AdditionalArgumentsTextBox.Text = settings.AdditionalArguments;
-        settings.Format ??= "MP4";
-        FormatComboBox.Text = settings.Format;
-        BadgeNotificationManager.Current.SetBadgeAsGlyph(BadgeNotificationGlyph.None);
-    }
-
-    private async void Page_Unloaded(object sender, RoutedEventArgs e)
-    {
-        // Save settings when the page is unloaded
-        await SaveSettingsAsync();
+        AutoUpdateYTDLPToggle.IsOn = settings.AutoUpdateYTDLP;
+        UseBundledFFMPEGToggle.IsOn = settings.UseBundledFFMPEG;
         BadgeNotificationManager.Current.SetBadgeAsGlyph(BadgeNotificationGlyph.None);
     }
 
@@ -152,7 +148,7 @@ public sealed partial class HomePage : Page, IDisposable
         SavingSettingsProgressRing.IsActive = false;
     }
 
-    private async Task<string> Paste()
+    private static async Task<string> Paste()
     {
         var package = Clipboard.GetContent();
         if (package.Contains(StandardDataFormats.Text))
@@ -189,7 +185,8 @@ public sealed partial class HomePage : Page, IDisposable
         DownloadProgressBar.Visibility = Visibility.Visible;
 
         string arguments = $"{(downloadFolder.Path != "" ? $"-P \"{downloadFolder.Path}\"" : "")}"
-            + $" --ffmpeg-location \"{ffmpegPath}\" "
+            + (settings.AutoUpdateYTDLP ? " --update" : "")
+            + (settings.UseBundledFFMPEG ? $" --ffmpeg-location \"{ffmpegPath}\"" : "")
             + $" -t \"{(string.IsNullOrEmpty(settings.Format) ? "mp4" : settings.Format.ToLower())}\" "
             + settings.AdditionalArguments + " "
             + link;
@@ -303,6 +300,7 @@ public sealed partial class HomePage : Page, IDisposable
 
     private async Task SaveSettingsAsync()
     {
+        if (!settings.Loaded) return;
         try
         {
             // Use a semaphore to prevent concurrent access to settings file
@@ -387,6 +385,7 @@ public sealed partial class HomePage : Page, IDisposable
                 settings.DownloadFolderPath ??= string.Empty;
                 settings.AdditionalArguments ??= string.Empty;
 
+                settings.Loaded = true;
                 Debug.WriteLine("Settings loaded successfully");
             }
             else
@@ -428,28 +427,16 @@ public sealed partial class HomePage : Page, IDisposable
         DownloadButton.Content = busy ? "Downloading..." : (string.IsNullOrEmpty(LinkTextBox.Text.Trim()) ? "Paste and Download" : "Download");
     }
 
-    private async void AdditionalArgumentsTextBox_LostFocus(object sender, RoutedEventArgs e)
+    private async void SaveSettingsUI(object sender, RoutedEventArgs e)
     {
-        if (AdditionalArgumentsTextBox != null)
-        {
-            SavingSettingsProgressRing.IsActive = true;
-            settings.AdditionalArguments = AdditionalArgumentsTextBox.Text?.Trim() ?? string.Empty;
-            await SaveSettingsAsync();
-            SavingSettingsProgressRing.IsActive = false;
-        }
+        SavingSettingsProgressRing.IsActive = true;
+        await SaveSettingsAsync();
+        SavingSettingsProgressRing.IsActive = false;
     }
 
     public void Dispose()
     {
         _settingsLock?.Dispose();
-    }
-
-    private async void FormatComboBox_SelectionChanged(object _, object __)
-    {
-        SavingSettingsProgressRing.IsActive = true;
-        settings.Format = FormatComboBox.Text;
-        await SaveSettingsAsync();
-        SavingSettingsProgressRing.IsActive = false;
     }
 
     [GeneratedRegex(@"(\d+.?\d*) ?%")]
