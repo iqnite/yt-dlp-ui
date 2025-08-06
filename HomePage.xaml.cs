@@ -16,6 +16,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -48,6 +49,11 @@ public sealed partial class HomePage : Page, IDisposable
         public string Format { get; set; } = "mp4";
         public bool AutoUpdateYTDLP { get; set; } = true;
         public bool UseBundledFFMPEG { get; set; } = true;
+    }
+
+    [JsonSerializable(typeof(AppSettings))]
+    internal partial class AppSettingsJsonContext : JsonSerializerContext
+    {
     }
 
     public class DownloadProgress
@@ -316,13 +322,7 @@ public sealed partial class HomePage : Page, IDisposable
             settings.DownloadFolderPath ??= string.Empty;
             settings.AdditionalArguments ??= string.Empty;
 
-            JsonSerializerOptions jsonSerializerOptions = new()
-            {
-                WriteIndented = true
-            };
-            var options = jsonSerializerOptions;
-
-            string json = JsonSerializer.Serialize(settings, options);
+            string json = JsonSerializer.Serialize(settings, AppSettingsJsonContext.Default.AppSettings);
 
             if (string.IsNullOrWhiteSpace(json) || json == "{}" || json == "null")
             {
@@ -382,7 +382,7 @@ public sealed partial class HomePage : Page, IDisposable
                 return;
             }
 
-            var loadedSettings = JsonSerializer.Deserialize<AppSettings>(json);
+            var loadedSettings = JsonSerializer.Deserialize<AppSettings>(json, AppSettingsJsonContext.Default.AppSettings);
             if (loadedSettings != null)
             {
                 settings = loadedSettings;
