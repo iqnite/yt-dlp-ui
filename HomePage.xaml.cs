@@ -6,6 +6,7 @@ using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
+using Microsoft.Web.WebView2.Core;
 using Microsoft.Windows.BadgeNotifications;
 using System;
 using System.Collections.Generic;
@@ -174,7 +175,10 @@ public sealed partial class HomePage : Page, IDisposable
         link = link.Trim();
         if (string.IsNullOrEmpty(link)) return;
         busy = true;
-        DownloadStatusInfoBar.IsOpen = false;
+        DownloadStatusInfoBar.IsOpen = true;
+        DownloadStatusInfoBar.Severity = InfoBarSeverity.Informational;
+        DownloadStatusInfoBar.IsClosable = false;
+        DownloadStatusInfoBar.Message = "Downloading...";
         OpenDownloadButton.Visibility = Visibility.Collapsed;
         UpdateDownloadButton();
         DownloadProgressBar.IsIndeterminate = true;
@@ -211,21 +215,22 @@ public sealed partial class HomePage : Page, IDisposable
             using Process downloadProcess = new() { StartInfo = psi, EnableRaisingEvents = true };
             downloadProcess.OutputDataReceived += (s, ea) =>
             {
-                if (ea.Data != null)
+                var line = ea.Data;
+                if (string.IsNullOrEmpty(line)) return;
+                _ = DispatcherQueue.TryEnqueue(() =>
                 {
-                    // Example: [download]  42.3% of   13.48MiB in 00:00:04 at 2.86MiB/s
-                    var line = ea.Data;
-                    if (line.StartsWith("[download]"))
+                    DownloadStatusInfoBar.Message = line;
+                });
+                if (line.StartsWith("[download]"))
+                {
+                    var percent = progress.ExtractProgress(line);
+                    if (percent != 0.0)
                     {
-                        var percent = progress.ExtractProgress(line);
-                        if (percent != 0.0)
+                        _ = DispatcherQueue.TryEnqueue(() =>
                         {
-                            _ = DispatcherQueue.TryEnqueue(() =>
-                            {
-                                DownloadProgressBar.IsIndeterminate = false;
-                                DownloadProgressBar.Value = (double)percent;
-                            });
-                        }
+                            DownloadProgressBar.IsIndeterminate = false;
+                            DownloadProgressBar.Value = (double)percent;
+                        });
                     }
                 }
             };
@@ -270,6 +275,7 @@ public sealed partial class HomePage : Page, IDisposable
         finally
         {
             busy = false;
+            DownloadStatusInfoBar.IsClosable = true;
             DownloadProgressBar.Visibility = Visibility.Collapsed;
             UpdateDownloadButton();
             BadgeNotificationManager.Current.ClearBadge();

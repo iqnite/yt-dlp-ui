@@ -17,9 +17,7 @@
                     VerticalAlignment="Top"
                     Grid.Row="1"
                     Grid.Column="1">
-                <TextBlock Text="Enter a video, song, playlist, or channel link"
-                       FontWeight="Medium"
-                       FontSize="16"/>
+
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
@@ -31,7 +29,7 @@
                     <TextBox x:Name="LinkTextBox"
                          AcceptsReturn="False"
                          TextWrapping="NoWrap"
-                         PlaceholderText="https://youtu.be/..."
+                         PlaceholderText="Enter a video, song, playlist, or channel link"
                          KeyUp="LinkTextBox_KeyUp"
                          HorizontalAlignment="Stretch"
                          Margin="4"
@@ -146,12 +144,12 @@
                                        FontSize="16"/>
                                 <TextBlock FontSize="12"
                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}">
-                                <Run Text="Settings intended for advanced users. See the"/>
-                                <Hyperlink NavigateUri="https://github.com/yt-dlp/yt-dlp#usage-and-options"
-                                           Foreground="{ThemeResource AccentFillColorDefaultBrush}">
-                                    <Run Text="yt-dlp documentation"/>
-                                </Hyperlink>
-                                <Run Text="for details."/>
+									<Run Text="Settings intended for advanced users. See the"/>
+									<Hyperlink NavigateUri="https://github.com/yt-dlp/yt-dlp#usage-and-options"
+											   Foreground="{ThemeResource AccentFillColorDefaultBrush}">
+										<Run Text="yt-dlp documentation"/>
+									</Hyperlink>
+									<Run Text="for details."/>
                                 </TextBlock>
                             </StackPanel>
                         </Grid>
