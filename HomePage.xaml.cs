@@ -34,26 +34,10 @@ namespace YT_DLP_UI;
 
 public sealed partial class HomePage : Page, IDisposable
 {
-    private const string SettingsFileName = "settings.json";
-    private StorageFolder downloadFolder = ApplicationData.Current.LocalFolder;
-    private readonly string exePath = Path.Combine(AppContext.BaseDirectory, "yt-dlp", "yt-dlp.exe");
-    private readonly string ffmpegPath = Path.Combine(AppContext.BaseDirectory, "ffmpeg", "ffmpeg-master-latest-win32-gpl", "bin", "ffmpeg.exe");
-    private bool busy = false;
-    private readonly SemaphoreSlim _settingsLock = new(1, 1);
-
-    public class AppSettings
-    {
-        public bool Loaded { get; set; } = false;
-        public string? DownloadFolderPath { get; set; }
-        public string AdditionalArguments { get; set; } = "";
-        public string Format { get; set; } = "mp4";
-        public bool UseBundledFFMPEG { get; set; } = true;
-    }
-
-    [JsonSerializable(typeof(AppSettings))]
-    internal partial class AppSettingsJsonContext : JsonSerializerContext
-    {
-    }
+    private StorageFolder DownloadFolder = ApplicationData.Current.LocalFolder;
+    private readonly string YTDLPPath = Path.Combine(AppContext.BaseDirectory, "yt-dlp", "yt-dlp.exe");
+    private readonly string FFMPEGPath = Path.Combine(AppContext.BaseDirectory, "ffmpeg", "ffmpeg-master-latest-win32-gpl", "bin", "ffmpeg.exe");
+    private bool Busy = false;
 
     public class DownloadProgress
     {
@@ -98,29 +82,27 @@ public sealed partial class HomePage : Page, IDisposable
         }
     }
 
-    private AppSettings settings = new();
-
     public HomePage()
     {
         InitializeComponent();
         Loaded += HomePage_Loaded;
     }
 
-    private async void HomePage_Loaded(object sender, RoutedEventArgs e)
+    public async void HomePage_Loaded(object sender, RoutedEventArgs e)
     {
         await LoadSettingsAsync();
-        if (!string.IsNullOrEmpty(settings.DownloadFolderPath) && Directory.Exists(settings.DownloadFolderPath))
+        if (!string.IsNullOrEmpty(Settings.DownloadFolderPath) && Directory.Exists(Settings.DownloadFolderPath))
         {
-            downloadFolder = await StorageFolder.GetFolderFromPathAsync(settings.DownloadFolderPath);
+            DownloadFolder = await StorageFolder.GetFolderFromPathAsync(Settings.DownloadFolderPath);
         }
-        PickDestinationOutputTextBlock.Text = downloadFolder.Path;
-        FormatComboBox.SelectedItem = settings.Format;
-        AdditionalArgumentsTextBox.Text = settings.AdditionalArguments;
-        UseBundledFFMPEGToggle.IsOn = settings.UseBundledFFMPEG;
+        PickDestinationOutputTextBlock.Text = DownloadFolder.Path;
+        FormatComboBox.SelectedItem = Settings.Format;
+        AdditionalArgumentsTextBox.Text = Settings.AdditionalArguments;
+        UseSystemFFMPEGToggle.IsOn = Settings.UseSystemFFMPEG;
         BadgeNotificationManager.Current.SetBadgeAsGlyph(BadgeNotificationGlyph.None);
     }
 
-    private async void PickDestinationButton_Click(object sender, RoutedEventArgs e)
+    public async void PickDestinationButton_Click(object sender, RoutedEventArgs e)
     {
         //disable the button to avoid double-clicking
         var senderButton = sender as Button;
@@ -141,11 +123,11 @@ public sealed partial class HomePage : Page, IDisposable
         SavingSettingsProgressRing.IsActive = true;
         if (folder != null)
         {
-            downloadFolder = folder;
-            settings.DownloadFolderPath = folder.Path;
+            DownloadFolder = folder;
+            Settings.DownloadFolderPath = folder.Path;
             await SaveSettingsAsync();
             StorageApplicationPermissions.FutureAccessList.AddOrReplace("PickedFolderToken", folder);
-            PickDestinationOutputTextBlock.Text = downloadFolder.Path;
+            PickDestinationOutputTextBlock.Text = DownloadFolder.Path;
         }
 
         //re-enable the button
@@ -153,7 +135,7 @@ public sealed partial class HomePage : Page, IDisposable
         SavingSettingsProgressRing.IsActive = false;
     }
 
-    private static async Task<string> Paste()
+    public static async Task<string> Paste()
     {
         var package = Clipboard.GetContent();
         if (package.Contains(StandardDataFormats.Text))
@@ -163,7 +145,7 @@ public sealed partial class HomePage : Page, IDisposable
         return "";
     }
 
-    private async void DownloadButton_Click(object sender, RoutedEventArgs e)
+    public async void DownloadButton_Click(object sender, RoutedEventArgs e)
     {
         string link = LinkTextBox.Text.Trim();
         if (string.IsNullOrEmpty(link))
@@ -173,12 +155,12 @@ public sealed partial class HomePage : Page, IDisposable
         Download(link);
     }
 
-    private async void Download(string link)
+    public async void Download(string link)
     {
-        if (busy) return;
+        if (Busy) return;
         link = link.Trim();
         if (string.IsNullOrEmpty(link)) return;
-        busy = true;
+        Busy = true;
         DownloadStatusInfoBar.IsOpen = true;
         DownloadStatusInfoBar.Severity = InfoBarSeverity.Informational;
         DownloadStatusInfoBar.IsClosable = false;
@@ -192,10 +174,10 @@ public sealed partial class HomePage : Page, IDisposable
         DownloadProgressBar.Value = 0;
         DownloadProgressBar.Visibility = Visibility.Visible;
 
-        string arguments = $"{(downloadFolder.Path != "" ? $"-P \"{downloadFolder.Path}\"" : "")}"
-            + (settings.UseBundledFFMPEG ? $" --ffmpeg-location \"{ffmpegPath}\"" : "")
-            + $" -t \"{(string.IsNullOrEmpty(settings.Format) ? "mp4" : settings.Format.ToLower())}\" "
-            + settings.AdditionalArguments + " "
+        string arguments = $"{(DownloadFolder.Path != "" ? $"-P \"{DownloadFolder.Path}\"" : "")}"
+            + (Settings.UseSystemFFMPEG ? "" : $" --ffmpeg-location \"{FFMPEGPath}\"")
+            + $" -t \"{(string.IsNullOrEmpty(Settings.Format) ? "mp4" : Settings.Format.ToLower())}\" "
+            + Settings.AdditionalArguments + " "
             + link;
 
         DownloadProgress progress = new();
@@ -205,7 +187,7 @@ public sealed partial class HomePage : Page, IDisposable
             var tcs = new TaskCompletionSource<int?>();
             var psi = new ProcessStartInfo
             {
-                FileName = exePath,
+                FileName = YTDLPPath,
                 Arguments = arguments,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
@@ -277,7 +259,7 @@ public sealed partial class HomePage : Page, IDisposable
         }
         finally
         {
-            busy = false;
+            Busy = false;
             DownloadStatusInfoBar.IsClosable = true;
             DownloadProgressBar.Visibility = Visibility.Collapsed;
             UpdateDownloadButton();
@@ -285,11 +267,11 @@ public sealed partial class HomePage : Page, IDisposable
         }
     }
 
-    private void OpenDownloadButton_Click(object sender, RoutedEventArgs e)
+    public void OpenDownloadButton_Click(object sender, RoutedEventArgs e)
     {
         try
         {
-            var folderPath = downloadFolder.Path;
+            var folderPath = DownloadFolder.Path;
             if (!string.IsNullOrEmpty(folderPath) && Directory.Exists(folderPath))
             {
                 Process.Start(new ProcessStartInfo
@@ -307,115 +289,9 @@ public sealed partial class HomePage : Page, IDisposable
         }
     }
 
-    private async Task SaveSettingsAsync()
+    public void LinkTextBox_KeyUp(object sender, KeyRoutedEventArgs e)
     {
-        if (!settings.Loaded) return;
-        try
-        {
-            // Use a semaphore to prevent concurrent access to settings file
-            await _settingsLock.WaitAsync();
-
-            settings ??= new AppSettings();
-            settings.DownloadFolderPath ??= string.Empty;
-            settings.AdditionalArguments ??= string.Empty;
-
-            string json = JsonSerializer.Serialize(settings, AppSettingsJsonContext.Default.AppSettings);
-
-            if (string.IsNullOrWhiteSpace(json) || json == "{}" || json == "null")
-            {
-                Debug.WriteLine("WARNING: Attempted to save empty settings, operation aborted");
-                return;
-            }
-
-            var tempFileName = SettingsFileName + ".temp";
-            var tempFile = await ApplicationData.Current.LocalFolder.CreateFileAsync(
-                tempFileName, CreationCollisionOption.ReplaceExisting);
-            await FileIO.WriteTextAsync(tempFile, json);
-            string verificationJson = await FileIO.ReadTextAsync(tempFile);
-            if (string.IsNullOrWhiteSpace(verificationJson))
-            {
-                Debug.WriteLine("ERROR: Settings verification failed - temp file is empty");
-                return;
-            }
-
-            StorageFile actualFile;
-            try
-            {
-                actualFile = await ApplicationData.Current.LocalFolder.GetFileAsync(SettingsFileName);
-            }
-            catch
-            {
-                actualFile = await ApplicationData.Current.LocalFolder.CreateFileAsync(
-                    SettingsFileName, CreationCollisionOption.ReplaceExisting);
-            }
-
-            await tempFile.CopyAndReplaceAsync(actualFile);
-            await tempFile.DeleteAsync();
-            Debug.WriteLine("Settings saved successfully");
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"ERROR saving settings: {ex.Message}");
-        }
-        finally
-        {
-            _settingsLock.Release();
-        }
-    }
-
-    private async Task LoadSettingsAsync()
-    {
-        try
-        {
-            await _settingsLock.WaitAsync();
-
-            var file = await ApplicationData.Current.LocalFolder.GetFileAsync(SettingsFileName);
-            string json = await FileIO.ReadTextAsync(file);
-
-            if (string.IsNullOrWhiteSpace(json))
-            {
-                Debug.WriteLine("WARNING: Settings file exists but is empty, using defaults");
-                settings = new AppSettings();
-                return;
-            }
-
-            var loadedSettings = JsonSerializer.Deserialize<AppSettings>(json, AppSettingsJsonContext.Default.AppSettings);
-            if (loadedSettings != null)
-            {
-                settings = loadedSettings;
-
-                // Ensure no null values
-                settings.DownloadFolderPath ??= string.Empty;
-                settings.AdditionalArguments ??= string.Empty;
-
-                settings.Loaded = true;
-                Debug.WriteLine("Settings loaded successfully");
-            }
-            else
-            {
-                Debug.WriteLine("WARNING: Failed to deserialize settings, using defaults");
-                settings = new AppSettings();
-            }
-        }
-        catch (FileNotFoundException)
-        {
-            Debug.WriteLine("Settings file not found, using defaults");
-            settings = new AppSettings();
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"ERROR loading settings: {ex.Message}");
-            settings = new AppSettings(); // Use defaults on any error
-        }
-        finally
-        {
-            _settingsLock.Release();
-        }
-    }
-
-    private void LinkTextBox_KeyUp(object sender, KeyRoutedEventArgs e)
-    {
-        if (busy) return;
+        if (Busy) return;
         UpdateDownloadButton();
 
         if (e.Key == Windows.System.VirtualKey.Enter)
@@ -424,27 +300,15 @@ public sealed partial class HomePage : Page, IDisposable
         }
     }
 
-    private void UpdateDownloadButton()
+    public void UpdateDownloadButton()
     {
-        DownloadButton.IsEnabled = !busy;
-        DownloadButton.Content = busy ? "Downloading..." : (string.IsNullOrEmpty(LinkTextBox.Text.Trim()) ? "Paste and Download" : "Download");
-    }
-
-    private async void SaveSettingsUI(object sender, RoutedEventArgs e)
-    {
-        SavingSettingsProgressRing.IsActive = true;
-        await SaveSettingsAsync();
-        SavingSettingsProgressRing.IsActive = false;
-    }
-
-    public void Dispose()
-    {
-        _settingsLock?.Dispose();
+        DownloadButton.IsEnabled = !Busy;
+        DownloadButton.Content = Busy ? "Downloading..." : (string.IsNullOrEmpty(LinkTextBox.Text.Trim()) ? "Paste and Download" : "Download");
     }
 
     [GeneratedRegex(@"(\d+.?\d*) ?%")]
-    private static partial Regex DownloadPercentageRegex();
+    public static partial Regex DownloadPercentageRegex();
 
     [GeneratedRegex(@"Downloading item (\d+) of (\d+)")]
-    private static partial Regex PlaylistItemsRegex();
+    public static partial Regex PlaylistItemsRegex();
 }

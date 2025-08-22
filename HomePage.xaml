@@ -118,7 +118,7 @@
                               SelectionChanged="SaveSettingsUI"
                               IsEditable="True"
                               Grid.Column="2"
-                              SelectedItem="{x:Bind Path=settings.Format, Mode=TwoWay}"
+                              SelectedItem="{x:Bind Path=Settings.Format, Mode=TwoWay}"
                               VerticalAlignment="Center">
                             <x:String>mp4</x:String>
                             <x:String>mp3</x:String>
@@ -160,11 +160,11 @@
                             <TextBox x:Name="AdditionalArgumentsTextBox"
                                  HorizontalAlignment="Stretch"
                                  VerticalAlignment="Stretch"
-                                 Text="{x:Bind Path=settings.AdditionalArguments, Mode=TwoWay}"
+                                 Text="{x:Bind Path=Settings.AdditionalArguments, Mode=TwoWay}"
                                  />
-                            <ToggleSwitch x:Name="UseBundledFFMPEGToggle"
-                                        Header="Use bundled ffmpeg"
-                                        IsOn="{x:Bind Path=settings.UseBundledFFMPEG, Mode=TwoWay}"
+                            <ToggleSwitch x:Name="UseSystemFFMPEGToggle"
+                                        Header="Use system ffmpeg"
+                                        IsOn="{x:Bind Path=Settings.UseSystemFFMPEG, Mode=TwoWay}"
                                       />
                             <Button x:Name="SaveSettingsButton"
                                 Content="Save"
