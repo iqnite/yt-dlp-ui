@@ -47,7 +47,6 @@ public sealed partial class HomePage : Page, IDisposable
         public string? DownloadFolderPath { get; set; }
         public string AdditionalArguments { get; set; } = "";
         public string Format { get; set; } = "mp4";
-        public bool AutoUpdateYTDLP { get; set; } = true;
         public bool UseBundledFFMPEG { get; set; } = true;
     }
 
@@ -117,7 +116,6 @@ public sealed partial class HomePage : Page, IDisposable
         PickDestinationOutputTextBlock.Text = downloadFolder.Path;
         FormatComboBox.SelectedItem = settings.Format;
         AdditionalArgumentsTextBox.Text = settings.AdditionalArguments;
-        AutoUpdateYTDLPToggle.IsOn = settings.AutoUpdateYTDLP;
         UseBundledFFMPEGToggle.IsOn = settings.UseBundledFFMPEG;
         BadgeNotificationManager.Current.SetBadgeAsGlyph(BadgeNotificationGlyph.None);
     }
@@ -195,7 +193,6 @@ public sealed partial class HomePage : Page, IDisposable
         DownloadProgressBar.Visibility = Visibility.Visible;
 
         string arguments = $"{(downloadFolder.Path != "" ? $"-P \"{downloadFolder.Path}\"" : "")}"
-            + (settings.AutoUpdateYTDLP ? " --update" : "")
             + (settings.UseBundledFFMPEG ? $" --ffmpeg-location \"{ffmpegPath}\"" : "")
             + $" -t \"{(string.IsNullOrEmpty(settings.Format) ? "mp4" : settings.Format.ToLower())}\" "
             + settings.AdditionalArguments + " "

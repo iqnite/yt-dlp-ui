@@ -162,10 +162,6 @@
                                  VerticalAlignment="Stretch"
                                  Text="{x:Bind Path=settings.AdditionalArguments, Mode=TwoWay}"
                                  />
-                            <ToggleSwitch x:Name="AutoUpdateYTDLPToggle"
-                                        Header="Update yt-dlp before downloading"
-                                        IsOn="{x:Bind Path=settings.AutoUpdateYTDLP, Mode=TwoWay}"
-                                      />
                             <ToggleSwitch x:Name="UseBundledFFMPEGToggle"
                                         Header="Use bundled ffmpeg"
                                         IsOn="{x:Bind Path=settings.UseBundledFFMPEG, Mode=TwoWay}"
