@@ -58,7 +58,7 @@
                             <StackPanel Orientation="Horizontal"
                                     Spacing="3">
                                 <FontIcon Glyph="&#xE8DA;"/>
-                                <TextBlock Text="Open"/>
+                                <TextBlock Text="Show"/>
                             </StackPanel>
                         </Button>
                     </InfoBar.ActionButton>
@@ -81,10 +81,11 @@
                             <TextBlock Text="Download destination"
                                    FontWeight="Medium"
                                    FontSize="16"/>
-                            <TextBlock x:Name="PickDestinationOutputTextBlock"
-                                   Text="No folder selected"
-                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                   FontSize="12"/>
+                            <HyperlinkButton x:Name="PickDestinationOutputTextBlock"
+                                   Content="No folder selected"
+                                   Click="OpenDownloadButton_Click"
+                                   FontSize="12"
+                                   Padding="0"/>
                         </StackPanel>
                         <Button x:Name="PickDestinationButton"
                             Content="Change folder"

@@ -97,7 +97,7 @@ public sealed partial class HomePage : Page, IDisposable
         {
             DownloadFolder = await StorageFolder.GetFolderFromPathAsync(Settings.DownloadFolderPath);
         }
-        PickDestinationOutputTextBlock.Text = DownloadFolder.Path;
+        PickDestinationOutputTextBlock.Content = DownloadFolder.Path;
         FormatComboBox.SelectedItem = Settings.Format;
         AdditionalArgumentsTextBox.Text = Settings.AdditionalArguments;
         UseSystemFFMPEGToggle.IsOn = Settings.UseSystemFFMPEG;
@@ -129,7 +129,7 @@ public sealed partial class HomePage : Page, IDisposable
             Settings.DownloadFolderPath = folder.Path;
             await SaveSettingsAsync();
             StorageApplicationPermissions.FutureAccessList.AddOrReplace("PickedFolderToken", folder);
-            PickDestinationOutputTextBlock.Text = DownloadFolder.Path;
+            PickDestinationOutputTextBlock.Content = DownloadFolder.Path;
         }
 
         //re-enable the button
