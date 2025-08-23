@@ -52,7 +52,9 @@ public sealed partial class HomePage : Page, IDisposable
             Regex regex = DownloadPercentageRegex();
             Match match = regex.Match(line);
             if (!match.Success) return;
-            if (!double.TryParse(match.Groups[1].Value, out double newPercentage)) return;
+
+            string numeric = match.Groups[1].Value.Replace(',', '.');
+            if (!double.TryParse(numeric, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double newPercentage)) return;
             if (newPercentage > 100) return;
             Percentage = newPercentage;
         }
@@ -306,7 +308,7 @@ public sealed partial class HomePage : Page, IDisposable
         DownloadButton.Content = Busy ? "Downloading..." : (string.IsNullOrEmpty(LinkTextBox.Text.Trim()) ? "Paste and Download" : "Download");
     }
 
-    [GeneratedRegex(@"(\d+.?\d*) ?%")]
+    [GeneratedRegex(@"(?<!\d)(\d+(?:[.,]\d+)?)\s?%", RegexOptions.CultureInvariant)]
     public static partial Regex DownloadPercentageRegex();
 
     [GeneratedRegex(@"Downloading item (\d+) of (\d+)")]
