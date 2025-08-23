@@ -31,6 +31,7 @@
                          TextWrapping="NoWrap"
                          PlaceholderText="Enter a video, song, playlist, or channel link"
                          KeyUp="LinkTextBox_KeyUp"
+                         TextChanged="LinkTextBox_TextChanged"
                          HorizontalAlignment="Stretch"
                          Margin="4"
                          Grid.Column="0"/>

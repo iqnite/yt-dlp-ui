@@ -294,12 +294,15 @@ public sealed partial class HomePage : Page, IDisposable
     public void LinkTextBox_KeyUp(object sender, KeyRoutedEventArgs e)
     {
         if (Busy) return;
-        UpdateDownloadButton();
-
         if (e.Key == Windows.System.VirtualKey.Enter)
         {
             Download(LinkTextBox.Text);
         }
+    }
+
+    public void LinkTextBox_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        UpdateDownloadButton();
     }
 
     public void UpdateDownloadButton()
