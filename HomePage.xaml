@@ -118,12 +118,13 @@
                         </StackPanel>
                         <ComboBox x:Name="FormatComboBox"
                               SelectionChanged="SaveSettingsUI"
-                              IsEditable="True"
+                              IsEditable="False"
                               Grid.Column="2"
                               SelectedItem="{x:Bind Path=Settings.Format, Mode=TwoWay}"
                               VerticalAlignment="Center">
                             <x:String>mp4</x:String>
                             <x:String>mp3</x:String>
+                            <x:String>Advanced</x:String>
                         </ComboBox>
                     </Grid>
                 </Border>

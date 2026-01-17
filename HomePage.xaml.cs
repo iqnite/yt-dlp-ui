@@ -15,6 +15,7 @@ using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Runtime.Intrinsics.Arm;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
@@ -26,6 +27,7 @@ using Windows.Foundation.Collections;
 using Windows.Storage;
 using Windows.Storage.AccessCache;
 using Windows.Storage.Pickers;
+using Windows.System;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -35,8 +37,9 @@ namespace YT_DLP_UI;
 public sealed partial class HomePage : Page, IDisposable
 {
     private StorageFolder DownloadFolder = ApplicationData.Current.LocalFolder;
-    private readonly string YTDLPPath = Path.Combine(AppContext.BaseDirectory, "yt-dlp", "yt-dlp.exe");
-    private readonly string FFMPEGPath = Path.Combine(AppContext.BaseDirectory, "ffmpeg", "ffmpeg-master-latest-win32-gpl", "bin", "ffmpeg.exe");
+    private readonly string YTDLPPath = Path.Combine(AppContext.BaseDirectory, "dependencies", "yt-dlp", "yt-dlp.exe");
+    private readonly string FFMPEGPath = Path.Combine(AppContext.BaseDirectory, "dependencies", "ffmpeg", "ffmpeg-master-latest-win32-gpl", "bin", "ffmpeg.exe");
+    private readonly string DenoPath = Path.Combine(AppContext.BaseDirectory, "dependencies", "deno", "bin", "deno.exe");
     private bool Busy = false;
 
     public class DownloadProgress
@@ -178,9 +181,10 @@ public sealed partial class HomePage : Page, IDisposable
 
         string arguments = $"{(DownloadFolder.Path != "" ? $"-P \"{DownloadFolder.Path}\"" : "")}"
             + (Settings.UseSystemFFMPEG ? "" : $" --ffmpeg-location \"{FFMPEGPath}\"")
-            + $" -t \"{(string.IsNullOrEmpty(Settings.Format) ? "mp4" : Settings.Format.ToLower())}\" "
-            + Settings.AdditionalArguments + " "
-            + link;
+            + $" --js-runtimes deno:\"{DenoPath}\""
+            + (Settings.Format.Equals("advanced", StringComparison.CurrentCultureIgnoreCase) ? "" : $" -t \"{Settings.Format.ToLower()}\"")
+            + " " + Settings.AdditionalArguments
+            + " " + link;
 
         DownloadProgress progress = new();
 
