@@ -40,7 +40,9 @@ public sealed partial class HomePage : Page, IDisposable
     private readonly string YTDLPPath = Path.Combine(AppContext.BaseDirectory, "dependencies", "yt-dlp", "yt-dlp.exe");
     private readonly string FFMPEGPath = Path.Combine(AppContext.BaseDirectory, "dependencies", "ffmpeg", "ffmpeg-master-latest-win32-gpl", "bin", "ffmpeg.exe");
     private readonly string DenoPath = Path.Combine(AppContext.BaseDirectory, "dependencies", "deno", "bin", "deno.exe");
-    private bool Busy = false;
+    private bool IsBusy = false;
+    private Process? DownloadProcess;
+    private CancellationTokenSource? DownloadCancellationTokenSource;
 
     public class DownloadProgress
     {
@@ -152,6 +154,11 @@ public sealed partial class HomePage : Page, IDisposable
 
     public async void DownloadButton_Click(object sender, RoutedEventArgs e)
     {
+        if (IsBusy)
+        {
+            CancelDownload();
+            return;
+        }
         string link = LinkTextBox.Text.Trim();
         if (string.IsNullOrEmpty(link))
         {
@@ -162,10 +169,10 @@ public sealed partial class HomePage : Page, IDisposable
 
     public async void Download(string link)
     {
-        if (Busy) return;
+        if (IsBusy) return;
         link = link.Trim();
         if (string.IsNullOrEmpty(link)) return;
-        Busy = true;
+        IsBusy = true;
         DownloadStatusInfoBar.IsOpen = true;
         DownloadStatusInfoBar.Severity = InfoBarSeverity.Informational;
         DownloadStatusInfoBar.IsClosable = false;
@@ -187,6 +194,7 @@ public sealed partial class HomePage : Page, IDisposable
             + " " + link;
 
         DownloadProgress progress = new();
+        DownloadCancellationTokenSource = new CancellationTokenSource();
 
         try
         {
@@ -204,6 +212,7 @@ public sealed partial class HomePage : Page, IDisposable
             string errorOutput = string.Empty;
 
             using Process downloadProcess = new() { StartInfo = psi, EnableRaisingEvents = true };
+            DownloadProcess = downloadProcess;
             downloadProcess.OutputDataReceived += (s, ea) =>
             {
                 var line = ea.Data;
@@ -265,11 +274,32 @@ public sealed partial class HomePage : Page, IDisposable
         }
         finally
         {
-            Busy = false;
+            DownloadProcess?.Dispose();
+            DownloadProcess = null;
+            DownloadCancellationTokenSource?.Dispose();
+            DownloadCancellationTokenSource = null;
+            IsBusy = false;
             DownloadStatusInfoBar.IsClosable = true;
             DownloadProgressBar.Visibility = Visibility.Collapsed;
             UpdateDownloadButton();
             BadgeNotificationManager.Current.ClearBadge();
+        }
+    }
+
+    public void CancelDownload()
+    {
+        DownloadCancellationTokenSource?.Cancel();
+
+        if (DownloadProcess != null && !DownloadProcess.HasExited)
+        {
+            try
+            {
+                DownloadProcess.Kill(true);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error killing process: {ex.Message}");
+            }
         }
     }
 
@@ -297,7 +327,7 @@ public sealed partial class HomePage : Page, IDisposable
 
     public void LinkTextBox_KeyUp(object sender, KeyRoutedEventArgs e)
     {
-        if (Busy) return;
+        if (IsBusy) return;
         if (e.Key == Windows.System.VirtualKey.Enter)
         {
             Download(LinkTextBox.Text);
@@ -311,8 +341,15 @@ public sealed partial class HomePage : Page, IDisposable
 
     public void UpdateDownloadButton()
     {
-        DownloadButton.IsEnabled = !Busy;
-        DownloadButton.Content = Busy ? "Downloading..." : (string.IsNullOrEmpty(LinkTextBox.Text.Trim()) ? "Paste and Download" : "Download");
+        DownloadButton.Style = (Style)Application.Current.Resources[IsBusy ? "DefaultButtonStyle" : "AccentButtonStyle"];
+        DownloadButton.Content = IsBusy ? "Cancel" : (string.IsNullOrEmpty(LinkTextBox.Text.Trim()) ? "Paste and Download" : "Download");
+    }
+
+    public void Dispose()
+    {
+        _settingsLock?.Dispose();
+        DownloadCancellationTokenSource?.Dispose();
+        DownloadProcess?.Dispose();
     }
 
     [GeneratedRegex(@"(?<!\d)(\d+(?:[.,]\d+)?)\s?%", RegexOptions.CultureInvariant)]

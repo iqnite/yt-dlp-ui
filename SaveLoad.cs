@@ -144,11 +144,6 @@ namespace YT_DLP_UI
                 Debug.WriteLine("Settings are ready for use");
             }
         }
-
-        public void Dispose()
-        {
-            _settingsLock?.Dispose();
-        }
     }
 
     [JsonSerializable(typeof(HomePage.AppSettings))]
