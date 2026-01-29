@@ -10,7 +10,7 @@
   <Identity
     Name="phorb.dev.wyder"
     Publisher="CN=3CBC7A89-9E4B-4361-A96B-4E0A89B8D37F"
-    Version="0.2.23.0" />
+    Version="1.0.31.0" />
 
   <mp:PhoneIdentity PhoneProductId="d04852fc-1c54-4653-85b0-cb4a1d49e3b0"
     PhonePublisherId="00000000-0000-0000-0000-000000000000" />
@@ -22,8 +22,6 @@
   </Properties>
 
   <Dependencies>
-    <TargetDeviceFamily Name="Windows.Universal" MinVersion="10.0.17763.0"
-      MaxVersionTested="10.0.19041.0" />
     <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.17763.0"
       MaxVersionTested="10.0.19041.0" />
   </Dependencies>
@@ -42,7 +40,8 @@
         BackgroundColor="transparent"
         Square150x150Logo="Assets\wyder.png"
         Square44x44Logo="Assets\wyder.png">
-        <uap:DefaultTile Square71x71Logo="Assets\SmallTile.png" Wide310x150Logo="Assets\WideTile.png" Square310x310Logo="Assets\LargeTile.png" ShortName="Wyder"/>
+        <uap:DefaultTile Square71x71Logo="Assets\SmallTile.png" Wide310x150Logo="Assets\WideTile.png" Square310x310Logo="Assets\LargeTile.png" ShortName="Wyder">
+        </uap:DefaultTile >
         <uap:SplashScreen Image="Assets\SplashScreen.png"/>
       </uap:VisualElements>
     </Application>

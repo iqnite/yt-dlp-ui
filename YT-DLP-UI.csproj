@@ -78,8 +78,8 @@
     <AppxBundle>Auto</AppxBundle>
     <HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
     <AppxBundlePlatforms>x64</AppxBundlePlatforms>
-    <PackageCertificateThumbprint>B3B87D7B57196EB7F76BF1AE5136FFE6EB628099</PackageCertificateThumbprint>
     <AppInstallerUri>https://iqnite.github.io/wyder/download/installer/yt-dlp-ui.appinstaller</AppInstallerUri>
     <GenerateTemporaryStoreCertificate>True</GenerateTemporaryStoreCertificate>
+    <PackageCertificateKeyFile>YT-DLP-UI_TemporaryKey.pfx</PackageCertificateKeyFile>
   </PropertyGroup>
 </Project>
