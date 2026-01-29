@@ -176,6 +176,67 @@
                         </StackPanel>
                     </Expander.Content>
                 </Expander>
+
+                <Expander HorizontalAlignment="Stretch" Padding="12">
+                    <Expander.Header>
+                        <Grid ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <FontIcon Glyph="&#xE946;" FontSize="24" VerticalAlignment="Center"/>
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="About" FontWeight="Medium" FontSize="16"/>
+                            </StackPanel>
+                        </Grid>
+                    </Expander.Header>
+                    <Expander.Content>
+                        <StackPanel Orientation="Vertical" Spacing="12">
+                            <TextBlock>Version: 1.0.32</TextBlock>
+                            <TextBlock>
+                            <Hyperlink NavigateUri="https://github.com/iqnite/yt-dlp-ui"
+										   Foreground="{ThemeResource AccentFillColorDefaultBrush}">
+                                Wyder Video Downloader on GitHub
+                            </Hyperlink>
+                            </TextBlock>
+                            <TextBlock FontWeight="Bold">
+                                Third-party software used:
+                            </TextBlock>
+                            <TextBlock>
+                            <Hyperlink NavigateUri="https://github.com/yt-dlp/yt-dlp"
+										   Foreground="{ThemeResource AccentFillColorDefaultBrush}">
+                                yt-dlp
+                            </Hyperlink>
+                            </TextBlock>
+                            <TextBlock>
+                            <Hyperlink NavigateUri="https://www.ffmpeg.org/"
+										   Foreground="{ThemeResource AccentFillColorDefaultBrush}">
+                                ffmpeg
+                            </Hyperlink>
+                            </TextBlock>
+                            <TextBlock>
+                            <Hyperlink NavigateUri="https://deno.com/"
+										   Foreground="{ThemeResource AccentFillColorDefaultBrush}">
+                                Deno
+                            </Hyperlink>
+                            </TextBlock>
+                            <TextBlock>
+                            <Hyperlink NavigateUri="https://learn.microsoft.com/en-us/windows/apps/winui/winui3/"
+										   Foreground="{ThemeResource AccentFillColorDefaultBrush}">
+                                WinUI 3
+                            </Hyperlink>
+                            </TextBlock>
+                            <TextBlock FontWeight="Bold">
+                                2025 - 2026 by
+                                <Hyperlink NavigateUri="https://iqnite.github.io/"
+                                           Foreground="{ThemeResource AccentFillColorDefaultBrush}">
+                                    phorb
+                                </Hyperlink>
+                            </TextBlock>
+                        </StackPanel>
+                    </Expander.Content>
+                </Expander>
             </StackPanel>
         </ScrollView>
 
