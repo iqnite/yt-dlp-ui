@@ -10,13 +10,13 @@
   <Identity
     Name="phorb.dev.wyder"
     Publisher="CN=3CBC7A89-9E4B-4361-A96B-4E0A89B8D37F"
-    Version="1.0.31.0" />
+    Version="1.0.32.0" />
 
   <mp:PhoneIdentity PhoneProductId="d04852fc-1c54-4653-85b0-cb4a1d49e3b0"
     PhonePublisherId="00000000-0000-0000-0000-000000000000" />
 
   <Properties>
-    <DisplayName>wyder</DisplayName>
+    <DisplayName>Wyder Video Downloader</DisplayName>
     <PublisherDisplayName>phorb.dev</PublisherDisplayName>
     <Logo>Assets\wyder.png</Logo>
   </Properties>
@@ -35,7 +35,7 @@
       Executable="$targetnametoken$.exe"
       EntryPoint="$targetentrypoint$">
       <uap:VisualElements
-        DisplayName="wyder"
+        DisplayName="Wyder VIdeo Downloader"
         Description="An easy-to-use video downloader based on yt-dlp."
         BackgroundColor="transparent"
         Square150x150Logo="Assets\wyder.png"
