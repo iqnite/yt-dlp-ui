@@ -1,4 +1,5 @@
 ﻿using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -36,6 +37,7 @@ namespace YT_DLP_UI
             public string DownloadFolderPath { get; set; } = string.Empty;
             public string AdditionalArguments { get; set; } = string.Empty;
             public string Format { get; set; } = "mp4";
+            public bool EmbedMetadata { get; set; } = true;
             public bool UseSystemFFMPEG { get; set; }
         }
 
@@ -44,6 +46,15 @@ namespace YT_DLP_UI
             SavingSettingsProgressRing.IsActive = true;
             await SaveSettingsAsync();
             SavingSettingsProgressRing.IsActive = false;
+        }
+
+        public async void EmbedMetadataToggle_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (sender is ToggleSwitch toggle)
+            {
+                Settings.EmbedMetadata = toggle.IsOn;
+            }
+            SaveSettingsUI(sender, e);
         }
 
         public async Task SaveSettingsAsync()

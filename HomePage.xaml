@@ -121,11 +121,44 @@
                               IsEditable="False"
                               Grid.Column="2"
                               SelectedItem="{x:Bind Path=Settings.Format, Mode=TwoWay}"
-                              VerticalAlignment="Center">
+                              VerticalAlignment="Center"
+                              HorizontalAlignment="Right">
                             <x:String>mp4</x:String>
                             <x:String>mp3</x:String>
                             <x:String>Advanced</x:String>
                         </ComboBox>
+                    </Grid>
+                </Border>
+
+                <Border Padding="12"
+                    CornerRadius="8"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                    <Grid ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <FontIcon Glyph="&#xE8EC;"
+                              FontSize="24"
+                              VerticalAlignment="Center"/>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="Embed Metadata"
+                                   FontWeight="Medium"
+                                   FontSize="16"/>
+                            <TextBlock Text="Add thumbnail, subtitles, author, and other information to the downloaded file."
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   FontSize="12"/>
+                        </StackPanel>
+                        <ToggleSwitch x:Name="EmbedMetadataToggle"
+                              Toggled="EmbedMetadataToggle_Toggled"
+                              Grid.Column="2"
+                              IsOn="{x:Bind Path=Settings.EmbedMetadata, Mode=TwoWay}"
+                              VerticalAlignment="Center"
+                              HorizontalAlignment="Right"
+                              HorizontalContentAlignment="Right"
+                              MinWidth="0"/>
                     </Grid>
                 </Border>
 

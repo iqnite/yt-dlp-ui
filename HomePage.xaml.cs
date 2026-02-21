@@ -105,6 +105,7 @@ public sealed partial class HomePage : Page, IDisposable
         PickDestinationOutputTextBlock.Content = DownloadFolder.Path;
         FormatComboBox.SelectedItem = Settings.Format;
         AdditionalArgumentsTextBox.Text = Settings.AdditionalArguments;
+        EmbedMetadataToggle.IsOn = Settings.EmbedMetadata;
         UseSystemFFMPEGToggle.IsOn = Settings.UseSystemFFMPEG;
         BadgeNotificationManager.Current.SetBadgeAsGlyph(BadgeNotificationGlyph.None);
     }
@@ -190,6 +191,7 @@ public sealed partial class HomePage : Page, IDisposable
             + (Settings.UseSystemFFMPEG ? "" : $" --ffmpeg-location \"{FFMPEGPath}\"")
             + $" --js-runtimes deno:\"{DenoPath}\""
             + (Settings.Format.Equals("advanced", StringComparison.CurrentCultureIgnoreCase) ? "" : $" -t \"{Settings.Format.ToLower()}\"")
+            + (Settings.EmbedMetadata ? " --embed-metadata --embed-subs --embed-thumbnail" : "")
             + " " + Settings.AdditionalArguments
             + " " + link;
 
