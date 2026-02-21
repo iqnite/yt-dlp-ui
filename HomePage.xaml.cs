@@ -78,13 +78,10 @@ public sealed partial class HomePage : Page, IDisposable
 
         public double ExtractProgress(string line)
         {
-            double prevProgress = ExtractedProgress;
             ExtractPercentage(line);
             ExtractPlaylistItems(line);
-
-            Debug.WriteLine($"{PlaylistItem} of {PlaylistTotal}, {Percentage}%");
             double newProgress = (PlaylistItem - 1 + Percentage / 100) / PlaylistTotal * 100;
-            if (newProgress > prevProgress) ExtractedProgress = newProgress;
+            ExtractedProgress = newProgress;
             return ExtractedProgress;
         }
     }
