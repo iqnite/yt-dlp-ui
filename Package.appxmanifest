@@ -10,7 +10,7 @@
   <Identity
     Name="phorb.dev.wyder"
     Publisher="CN=3CBC7A89-9E4B-4361-A96B-4E0A89B8D37F"
-    Version="1.0.33.0" />
+    Version="1.0.34.0" />
 
   <mp:PhoneIdentity PhoneProductId="d04852fc-1c54-4653-85b0-cb4a1d49e3b0"
     PhonePublisherId="00000000-0000-0000-0000-000000000000" />
