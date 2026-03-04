@@ -226,7 +226,7 @@
                     </Expander.Header>
                     <Expander.Content>
                         <StackPanel Orientation="Vertical" Spacing="12">
-                            <TextBlock>Version: 1.0.34</TextBlock>
+                            <TextBlock>Version: 1.0.35</TextBlock>
                             <TextBlock>
                             <Hyperlink NavigateUri="https://github.com/iqnite/yt-dlp-ui"
 										   Foreground="{ThemeResource AccentFillColorDefaultBrush}">
