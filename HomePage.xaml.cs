@@ -41,6 +41,7 @@ public sealed partial class HomePage : Page, IDisposable
     private readonly string FFMPEGPath = Path.Combine(AppContext.BaseDirectory, "dependencies", "ffmpeg", "ffmpeg-master-latest-win32-gpl", "bin", "ffmpeg.exe");
     private readonly string DenoPath = Path.Combine(AppContext.BaseDirectory, "dependencies", "deno", "bin", "deno.exe");
     private bool IsBusy = false;
+    private bool IsDownloadCancelled = false;
     private Process? DownloadProcess;
     private CancellationTokenSource? DownloadCancellationTokenSource;
 
@@ -129,10 +130,11 @@ public sealed partial class HomePage : Page, IDisposable
         link = link.Trim();
         if (string.IsNullOrEmpty(link)) return;
         IsBusy = true;
+        IsDownloadCancelled = false;
         DownloadStatusInfoBar.IsOpen = true;
         DownloadStatusInfoBar.Severity = InfoBarSeverity.Informational;
         DownloadStatusInfoBar.IsClosable = false;
-        DownloadStatusInfoBar.Message = "Downloading...";
+        DownloadStatusInfoBar.Message = "Starting...";
         OpenDownloadButton.Visibility = Visibility.Collapsed;
         UpdateDownloadButton();
         DownloadProgressBar.IsIndeterminate = true;
@@ -211,10 +213,22 @@ public sealed partial class HomePage : Page, IDisposable
 
             if (exitCode == 0)
             {
-                DownloadStatusInfoBar.Severity = InfoBarSeverity.Success;
-                DownloadStatusInfoBar.Message = "Download completed successfully!";
+                if (string.IsNullOrEmpty(errorOutput))
+                {
+                    DownloadStatusInfoBar.Severity = InfoBarSeverity.Success;
+                    DownloadStatusInfoBar.Message = "Download completed successfully!";
+                }
+                else
+                {
+                    DownloadStatusInfoBar.Severity = InfoBarSeverity.Warning;
+                    DownloadStatusInfoBar.Message = "Download completed with warnings:\n" + errorOutput.Trim() + "\n";
+                }
                 OpenDownloadButton.Visibility = Visibility.Visible;
                 DownloadStatusInfoBar.IsOpen = true;
+            }
+            else if (IsDownloadCancelled)
+            {
+                DownloadStatusInfoBar.IsOpen = false;
             }
             else
             {
@@ -249,6 +263,7 @@ public sealed partial class HomePage : Page, IDisposable
 
         if (DownloadProcess != null && !DownloadProcess.HasExited)
         {
+            IsDownloadCancelled = true;
             try
             {
                 DownloadProcess.Kill(true);
