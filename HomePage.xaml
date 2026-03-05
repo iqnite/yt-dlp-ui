@@ -180,12 +180,12 @@
                                        FontSize="16"/>
                                 <TextBlock FontSize="12"
                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}">
-									<Run Text="Settings intended for advanced users. See the"/>
-									<Hyperlink NavigateUri="https://github.com/yt-dlp/yt-dlp#usage-and-options"
-											   Foreground="{ThemeResource AccentFillColorDefaultBrush}">
-										<Run Text="yt-dlp documentation"/>
-									</Hyperlink>
-									<Run Text="for details."/>
+                                    <Run Text="Settings intended for advanced users. See the"/>
+                                    <Hyperlink NavigateUri="https://github.com/yt-dlp/yt-dlp#usage-and-options"
+                                               Foreground="{ThemeResource AccentFillColorDefaultBrush}">
+                                        <Run Text="yt-dlp documentation"/>
+                                    </Hyperlink>
+                                    <Run Text="for details."/>
                                 </TextBlock>
                             </StackPanel>
                         </Grid>
@@ -229,7 +229,7 @@
                             <TextBlock>Version: 1.0.36</TextBlock>
                             <TextBlock>
                             <Hyperlink NavigateUri="https://github.com/iqnite/yt-dlp-ui"
-										   Foreground="{ThemeResource AccentFillColorDefaultBrush}">
+                                           Foreground="{ThemeResource AccentFillColorDefaultBrush}">
                                 Wyder Video Downloader on GitHub
                             </Hyperlink>
                             </TextBlock>
@@ -238,7 +238,7 @@
                             </TextBlock>
                             <TextBlock>
                                 <Hyperlink NavigateUri="https://github.com/yt-dlp/yt-dlp"
-										       Foreground="{ThemeResource AccentFillColorDefaultBrush}">
+                                               Foreground="{ThemeResource AccentFillColorDefaultBrush}">
                                     yt-dlp
                                 </Hyperlink>
                                 (<Hyperlink NavigateUri="https://github.com/yt-dlp/yt-dlp/blob/master/LICENSE" Foreground="{ThemeResource AccentFillColorDefaultBrush}">
@@ -247,7 +247,7 @@
                             </TextBlock>
                             <TextBlock>
                                 <Hyperlink NavigateUri="https://www.ffmpeg.org/"
-										       Foreground="{ThemeResource AccentFillColorDefaultBrush}">
+                                               Foreground="{ThemeResource AccentFillColorDefaultBrush}">
                                     ffmpeg
                                 </Hyperlink>
                                 (<Hyperlink NavigateUri="https://github.com/yt-dlp/FFmpeg-Builds/blob/master/LICENSE" Foreground="{ThemeResource AccentFillColorDefaultBrush}">
@@ -256,7 +256,7 @@
                             </TextBlock>
                             <TextBlock>
                                 <Hyperlink NavigateUri="https://deno.com/"
-										       Foreground="{ThemeResource AccentFillColorDefaultBrush}">
+                                               Foreground="{ThemeResource AccentFillColorDefaultBrush}">
                                     Deno
                                 </Hyperlink>
                                 (<Hyperlink NavigateUri="https://github.com/denoland/deno/blob/main/LICENSE.md" Foreground="{ThemeResource AccentFillColorDefaultBrush}">
@@ -265,7 +265,7 @@
                             </TextBlock>
                             <TextBlock>
                                 <Hyperlink NavigateUri="https://learn.microsoft.com/en-us/windows/apps/winui/winui3/"
-										       Foreground="{ThemeResource AccentFillColorDefaultBrush}">
+                                               Foreground="{ThemeResource AccentFillColorDefaultBrush}">
                                     WinUI 3
                                 </Hyperlink>
                                 (<Hyperlink NavigateUri="https://learn.microsoft.com/en-us/windows/apps/winui/winui2/license" Foreground="{ThemeResource AccentFillColorDefaultBrush}">
