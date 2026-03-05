@@ -199,7 +199,7 @@
                                  Text="{x:Bind Path=Settings.AdditionalArguments, Mode=TwoWay}"
                                  />
                             <ToggleSwitch x:Name="UseSystemFFMPEGToggle"
-                                        Header="Use system ffmpeg"
+                                        Header="Override bundled tools"
                                         IsOn="{x:Bind Path=Settings.UseSystemFFMPEG, Mode=TwoWay}"
                                       />
                             <Button x:Name="SaveSettingsButton"

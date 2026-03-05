@@ -145,8 +145,7 @@ public sealed partial class HomePage : Page, IDisposable
         DownloadProgressBar.Visibility = Visibility.Visible;
 
         string arguments = $"{(DownloadFolder.Path != "" ? $"-P \"{DownloadFolder.Path}\"" : "")}"
-            + (Settings.UseSystemFFMPEG ? "" : $" --ffmpeg-location \"{FFMPEGPath}\"")
-            + $" --js-runtimes deno:\"{DenoPath}\""
+            + (Settings.UseSystemFFMPEG ? "" : $" --ffmpeg-location \"{FFMPEGPath}\" --js-runtimes deno:\"{DenoPath}\"")
             + (Settings.Format.Equals("advanced", StringComparison.CurrentCultureIgnoreCase) ? "" : $" -t \"{Settings.Format.ToLower()}\"")
             + (Settings.EmbedMetadata ? " --embed-metadata --embed-subs --embed-thumbnail" : "")
             + " " + Settings.AdditionalArguments
