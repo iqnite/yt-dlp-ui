@@ -143,13 +143,7 @@ public sealed partial class HomePage : Page, IDisposable
         DownloadProgressBar.Maximum = 100;
         DownloadProgressBar.Value = 0;
         DownloadProgressBar.Visibility = Visibility.Visible;
-
-        string arguments = $"{(DownloadFolder.Path != "" ? $"-P \"{DownloadFolder.Path}\"" : "")}"
-            + (Settings.UseSystemFFMPEG ? "" : $" --ffmpeg-location \"{FFMPEGPath}\" --js-runtimes deno:\"{DenoPath}\"")
-            + (Settings.Format.Equals("advanced", StringComparison.CurrentCultureIgnoreCase) ? "" : $" -t \"{Settings.Format.ToLower()}\"")
-            + (Settings.EmbedMetadata ? " --embed-metadata --embed-subs --embed-thumbnail" : "")
-            + " " + Settings.AdditionalArguments
-            + " " + link;
+        string arguments = GetDownloadArguments(link);
 
         DownloadProgress progress = new();
         DownloadCancellationTokenSource = new CancellationTokenSource();
@@ -256,6 +250,16 @@ public sealed partial class HomePage : Page, IDisposable
         }
     }
 
+    private string GetDownloadArguments(string link)
+    {
+        return $"{(DownloadFolder.Path != "" ? $"-P \"{DownloadFolder.Path}\"" : "")}"
+            + (Settings.UseSystemFFMPEG ? "" : $" --ffmpeg-location \"{FFMPEGPath}\" --js-runtimes deno:\"{DenoPath}\"")
+            + (Settings.Format.Equals("advanced", StringComparison.CurrentCultureIgnoreCase) ? "" : $" -t \"{Settings.Format.ToLower()}\"")
+            + (Settings.EmbedMetadata ? " --embed-metadata --embed-subs --embed-thumbnail" : "")
+            + " " + Settings.AdditionalArguments
+            + " " + link;
+    }
+
     public void CancelDownload()
     {
         DownloadCancellationTokenSource?.Cancel();
@@ -328,4 +332,13 @@ public sealed partial class HomePage : Page, IDisposable
 
     [GeneratedRegex(@"Downloading item (\d+) of (\d+)")]
     public static partial Regex PlaylistItemsRegex();
+
+    private void CopyCommandButton_Click(object sender, RoutedEventArgs e)
+    {
+        string link = LinkTextBox.Text.Trim();
+        string command = $"{YTDLPPath} {GetDownloadArguments(link)}";
+        var dataPackage = new DataPackage();
+        dataPackage.SetText(command);
+        Clipboard.SetContent(dataPackage);
+    }
 }

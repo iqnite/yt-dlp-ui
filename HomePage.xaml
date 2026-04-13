@@ -206,6 +206,10 @@
                                 Content="Save"
                                 Click="SaveSettingsUI"
                                 />
+                            <Button x:Name="CopyCommandButton"
+                                Content="Copy download command"
+                                Click="CopyCommandButton_Click"
+                                />
                         </StackPanel>
                     </Expander.Content>
                 </Expander>
