@@ -1,31 +1,16 @@
-﻿using ABI.Windows.ApplicationModel.Activation;
-using Microsoft.UI.Xaml;
+﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
-using Microsoft.Web.WebView2.Core;
 using Microsoft.Windows.BadgeNotifications;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
-using System.Runtime.InteropServices.WindowsRuntime;
-using System.Runtime.Intrinsics.Arm;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.DataTransfer;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 using Windows.Storage;
 using Windows.Storage.AccessCache;
 using Windows.Storage.Pickers;
@@ -44,6 +29,7 @@ public sealed partial class HomePage : Page, IDisposable
     private readonly string DenoPath = Path.Combine(AppContext.BaseDirectory, "dependencies", "deno", "bin", "deno.exe");
     private bool IsBusy = false;
     private bool IsDownloadCancelled = false;
+    private bool IsUpdatingSettings = false;
     private Process? DownloadProcess;
     private CancellationTokenSource? DownloadCancellationTokenSource;
 
@@ -67,22 +53,215 @@ public sealed partial class HomePage : Page, IDisposable
     public HomePage()
     {
         InitializeComponent();
+        DataContext = this;
         Loaded += HomePage_Loaded;
     }
 
     public async void HomePage_Loaded(object sender, RoutedEventArgs e)
     {
         await LoadSettingsAsync();
-        if (!string.IsNullOrEmpty(Settings.DownloadFolderPath) && Directory.Exists(Settings.DownloadFolderPath))
+        string downloadFolderPath = Settings.GetActiveProfile().DownloadFolderPath;
+        if (!string.IsNullOrEmpty(downloadFolderPath) && Directory.Exists(downloadFolderPath))
         {
-            DownloadFolder = await StorageFolder.GetFolderFromPathAsync(Settings.DownloadFolderPath);
+            DownloadFolder = await StorageFolder.GetFolderFromPathAsync(downloadFolderPath);
         }
-        PickDestinationOutputTextBlock.Content = DownloadFolder.Path;
-        FormatComboBox.SelectedItem = Settings.Format;
-        AdditionalArgumentsTextBox.Text = Settings.AdditionalArguments;
-        EmbedMetadataToggle.IsOn = Settings.EmbedMetadata;
-        UseSystemFFMPEGToggle.IsOn = Settings.UseSystemFFMPEG;
-        BadgeNotificationManager.Current.SetBadgeAsGlyph(BadgeNotificationGlyph.None);
+        UpdateSettingsUI();
+    }
+
+    private void UpdateSettingsUI()
+    {
+        if (IsUpdatingSettings) return;
+        IsUpdatingSettings = true;
+        try
+        {
+            ProfilesComboBox.Items.Clear();
+            foreach (var profile in Settings.Profiles)
+            {
+                ProfilesComboBox.Items.Add(profile.Name);
+            }
+            UpdateRemoveButtonState();
+            ProfilesComboBox.SelectedIndex = Settings.ActiveProfileId;
+            PickDestinationOutputTextBlock.Content = Settings.GetActiveProfile().DownloadFolderPath;
+            FormatComboBox.SelectedItem = Settings.GetActiveProfile().Format;
+            AdditionalArgumentsTextBox.Text = Settings.GetActiveProfile().AdditionalArguments;
+            EmbedMetadataToggle.IsOn = Settings.GetActiveProfile().EmbedMetadata;
+            UseSystemFFMPEGToggle.IsOn = Settings.GetActiveProfile().UseSystemFFMPEG;
+            BadgeNotificationManager.Current.SetBadgeAsGlyph(BadgeNotificationGlyph.None);
+        }
+        finally
+        {
+            IsUpdatingSettings = false;
+        }
+    }
+
+    private void ProfilesComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (IsUpdatingSettings) return;
+        if (ProfilesComboBox.SelectedIndex >= 0)
+        {
+            Settings.ActiveProfileId = ProfilesComboBox.SelectedIndex;
+        }
+        UpdateSettingsUI();
+        Debug.WriteLine($"Profile changed to: {ProfilesComboBox.SelectedItem}");
+    }
+
+    private void AddProfileButton_Click(object sender, RoutedEventArgs e)
+    {
+        AddProfileNameTextBox.Text = string.Empty;
+        AddProfileNameTextBox.Focus(FocusState.Programmatic);
+    }
+
+    private void RenameProfileButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (ProfilesComboBox.SelectedItem is not string currentProfile)
+        {
+            ShowErrorDialog("Please select a profile to rename");
+            return;
+        }
+
+        RenameProfileNameTextBox.Text = currentProfile;
+        RenameProfileNameTextBox.SelectAll();
+        RenameProfileNameTextBox.Focus(FocusState.Programmatic);
+    }
+
+    private void RemoveProfileButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (ProfilesComboBox.SelectedItem is not string selectedProfile)
+        {
+            return;
+        }
+
+        if (ProfilesComboBox.Items.Count <= 1)
+        {
+            ShowErrorDialog("You must have at least one profile");
+            return;
+        }
+
+        RemoveProfileFlyout.ShowAt(RemoveButton);
+    }
+
+    private void RemoveProfileConfirm_Click(object sender, RoutedEventArgs e)
+    {
+        if (ProfilesComboBox.SelectedItem is not string selectedProfile)
+        {
+            return;
+        }
+
+        IsUpdatingSettings = true;
+        int currentIndex = ProfilesComboBox.SelectedIndex;
+        ProfilesComboBox.Items.RemoveAt(currentIndex);
+        Settings.RemoveProfile(currentIndex);
+        if (ProfilesComboBox.Items.Count > 0)
+        {
+            ProfilesComboBox.SelectedIndex = Math.Min(currentIndex, ProfilesComboBox.Items.Count - 1);
+        }
+        IsUpdatingSettings = false;
+
+        RemoveProfileFlyout.Hide();
+        UpdateRemoveButtonState();
+    }
+
+    private void AddProfileConfirm_Click(object sender, RoutedEventArgs e)
+    {
+        string profileName = AddProfileNameTextBox.Text.Trim();
+
+        if (string.IsNullOrWhiteSpace(profileName))
+        {
+            return;
+        }
+
+        if (ProfilesComboBox.Items.Contains(profileName))
+        {
+            ShowErrorDialog("A profile with this name already exists");
+            return;
+        }
+
+        AppSettingsProfile newProfile = new()
+        {
+            Name = profileName,
+            DownloadFolderPath = Settings.GetActiveProfile().DownloadFolderPath,
+            AdditionalArguments = Settings.GetActiveProfile().AdditionalArguments,
+            Format = Settings.GetActiveProfile().Format,
+            EmbedMetadata = Settings.GetActiveProfile().EmbedMetadata,
+            UseSystemFFMPEG = Settings.GetActiveProfile().UseSystemFFMPEG
+        };
+        Settings.AddAndUseProfile(newProfile);
+        ProfilesComboBox.Items.Add(profileName);
+        ProfilesComboBox.SelectedItem = profileName;
+        AddProfileFlyout.Hide();
+        UpdateRemoveButtonState();
+    }
+
+    private void AddProfileNameTextBox_KeyUp(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
+    {
+        if (e.Key == Windows.System.VirtualKey.Enter)
+        {
+            AddProfileConfirm_Click(sender, e);
+        }
+        else if (e.Key == Windows.System.VirtualKey.Escape)
+        {
+            AddProfileFlyout.Hide();
+        }
+    }
+
+    private void RenameProfileConfirm_Click(object sender, RoutedEventArgs e)
+    {
+        string profileName = RenameProfileNameTextBox.Text.Trim();
+
+        if (string.IsNullOrWhiteSpace(profileName))
+        {
+            return;
+        }
+        if (ProfilesComboBox.SelectedItem is not string currentProfile)
+        {
+            return;
+        }
+        if (profileName == currentProfile)
+        {
+            return;
+        }
+        if (ProfilesComboBox.Items.Contains(profileName))
+        {
+            ShowErrorDialog("A profile with this name already exists");
+            return;
+        }
+
+        IsUpdatingSettings = true;
+        int selectedIndex = ProfilesComboBox.SelectedIndex;
+        Settings.GetActiveProfile().Name = profileName;
+        ProfilesComboBox.Items[selectedIndex] = profileName;
+        ProfilesComboBox.SelectedIndex = selectedIndex;
+        IsUpdatingSettings = false;
+        RenameProfileFlyout.Hide();
+    }
+
+    private void RenameProfileNameTextBox_KeyUp(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
+    {
+        if (e.Key == Windows.System.VirtualKey.Enter)
+        {
+            RenameProfileConfirm_Click(sender, e);
+        }
+        else if (e.Key == Windows.System.VirtualKey.Escape)
+        {
+            RenameProfileFlyout.Hide();
+        }
+    }
+
+    private void UpdateRemoveButtonState()
+    {
+        RemoveButton.IsEnabled = ProfilesComboBox.Items.Count > 1;
+    }
+
+    private async void ShowErrorDialog(string message)
+    {
+        var dialog = new ContentDialog
+        {
+            Title = "Invalid Action",
+            Content = message,
+            CloseButtonText = "OK",
+            XamlRoot = XamlRoot
+        };
+        await dialog.ShowAsync();
     }
 
     public async void PickDestinationButton_Click(object sender, RoutedEventArgs e)
@@ -107,7 +286,7 @@ public sealed partial class HomePage : Page, IDisposable
         if (folder != null)
         {
             DownloadFolder = folder;
-            Settings.DownloadFolderPath = folder.Path;
+            Settings.GetActiveProfile().DownloadFolderPath = folder.Path;
             await SaveSettingsAsync();
             StorageApplicationPermissions.FutureAccessList.AddOrReplace("PickedFolderToken", folder);
             PickDestinationOutputTextBlock.Content = DownloadFolder.Path;
@@ -272,10 +451,10 @@ public sealed partial class HomePage : Page, IDisposable
     private string GetDownloadArguments(string link)
     {
         return $"{(DownloadFolder.Path != "" ? $"-P \"{DownloadFolder.Path}\"" : "")}"
-            + (Settings.UseSystemFFMPEG ? "" : $" --ffmpeg-location \"{FFMPEGPath}\" --js-runtimes deno:\"{DenoPath}\"")
-            + (Settings.Format.Equals("advanced", StringComparison.CurrentCultureIgnoreCase) ? "" : $" -t \"{Settings.Format.ToLower()}\"")
-            + (Settings.EmbedMetadata ? " --embed-metadata --embed-subs --embed-thumbnail" : "")
-            + " " + Settings.AdditionalArguments
+            + (Settings.GetActiveProfile().UseSystemFFMPEG ? "" : $" --ffmpeg-location \"{FFMPEGPath}\" --js-runtimes deno:\"{DenoPath}\"")
+            + (Settings.GetActiveProfile().Format.Equals("advanced", StringComparison.CurrentCultureIgnoreCase) ? "" : $" -t \"{Settings.GetActiveProfile().Format.ToLower()}\"")
+            + (Settings.GetActiveProfile().EmbedMetadata ? " --embed-metadata --embed-subs --embed-thumbnail" : "")
+            + " " + Settings.GetActiveProfile().AdditionalArguments
             + " " + link;
     }
 
@@ -337,6 +516,16 @@ public sealed partial class HomePage : Page, IDisposable
     {
         DownloadButton.Style = (Style)Application.Current.Resources[IsBusy ? "DefaultButtonStyle" : "AccentButtonStyle"];
         DownloadButton.Content = IsBusy ? "Cancel" : (string.IsNullOrEmpty(LinkTextBox.Text.Trim()) ? "Paste and Download" : "Download");
+    }
+    private async void FormatComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        Settings.GetActiveProfile().Format = FormatComboBox.SelectedItem.ToString() ?? "mp4";
+        await SaveSettingsAsync();
+    }
+
+    private void AdditionalArgumentsTextBox_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        Settings.GetActiveProfile().AdditionalArguments = AdditionalArgumentsTextBox.Text;
     }
 
     public void Dispose()

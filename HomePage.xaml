@@ -62,6 +62,118 @@
                 <Border Padding="12"
                         CornerRadius="8"
                         Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                    <StackPanel Orientation="Vertical"
+                            Spacing="12">
+                        <Grid ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <FontIcon Glyph="&#xE77B;"
+                                      FontSize="24"
+                                      VerticalAlignment="Center"/>
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="Profile"
+                                           FontWeight="Medium"
+                                           FontSize="16"/>
+                                <TextBlock Text="Manage different download configurations"
+                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                           FontSize="12"/>
+                            </StackPanel>
+
+                            <Grid Grid.Column="2"
+                                  ColumnSpacing="8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <ComboBox x:Name="ProfilesComboBox"
+                                          Grid.Column="0"
+                                          SelectionChanged="ProfilesComboBox_SelectionChanged"/>
+
+                                <Button Grid.Column="1"
+                                        x:Name="AddProfileButton"
+                                        Click="AddProfileButton_Click"
+                                        ToolTipService.ToolTip="Add profile">
+                                    <FontIcon Glyph="&#xE710;"
+                                            FontSize="16"/>
+                                    <Button.Flyout>
+                                        <Flyout x:Name="AddProfileFlyout"
+                                                Placement="Bottom">
+                                            <StackPanel Spacing="8"
+                                                    Orientation="Vertical">
+                                                <TextBox x:Name="AddProfileNameTextBox"
+                                                         PlaceholderText="Profile name"
+                                                         KeyUp="AddProfileNameTextBox_KeyUp"
+                                                         MinWidth="200"/>
+                                                <StackPanel Orientation="Horizontal"
+                                                        Spacing="8">
+                                                    <Button Content="Confirm"
+                                                            Click="AddProfileConfirm_Click"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </Flyout>
+                                    </Button.Flyout>
+                                </Button>
+                                <Button Grid.Column="2"
+                                        x:Name="RenameProfileButton"
+                                        Click="RenameProfileButton_Click"
+                                        ToolTipService.ToolTip="Rename profile">
+                                    <FontIcon Glyph="&#xE13E;"
+                                            FontSize="16"/>
+                                    <Button.Flyout>
+                                        <Flyout x:Name="RenameProfileFlyout"
+                                                Placement="Bottom">
+                                            <StackPanel Spacing="8"
+                                                    Orientation="Vertical">
+                                                <TextBox x:Name="RenameProfileNameTextBox"
+                                                         PlaceholderText="New name"
+                                                         KeyUp="RenameProfileNameTextBox_KeyUp"
+                                                         MinWidth="200"/>
+                                                <StackPanel Orientation="Horizontal"
+                                                        Spacing="8">
+                                                    <Button Content="Confirm"
+                                                            Click="RenameProfileConfirm_Click"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </Flyout>
+                                    </Button.Flyout>
+                                </Button>
+                                <Button Grid.Column="3"
+                                        x:Name="RemoveButton"
+                                        Click="RemoveProfileButton_Click"
+                                        ToolTipService.ToolTip="Remove profile">
+                                    <FontIcon Glyph="&#xE74D;"
+                                            FontSize="16"/>
+                                    <Button.Flyout>
+                                        <Flyout x:Name="RemoveProfileFlyout"
+                                                Placement="Bottom">
+                                            <StackPanel Spacing="12"
+                                                    Orientation="Vertical">
+                                                <TextBlock Text="Remove this profile?"
+                                                           FontWeight="Medium"/>
+                                                <StackPanel Orientation="Horizontal"
+                                                        Spacing="8">
+                                                    <Button Content="Remove"
+                                                            Click="RemoveProfileConfirm_Click"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </Flyout>
+                                    </Button.Flyout>
+                                </Button>
+                            </Grid>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <Border Padding="12"
+                        CornerRadius="8"
+                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
                     <Grid ColumnSpacing="12">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -116,8 +228,7 @@
                                   HorizontalAlignment="Right"
                                   VerticalAlignment="Center"
                                   IsEditable="False"
-                                  SelectionChanged="SaveSettingsUI"
-                                  SelectedItem="{x:Bind Path=Settings.Format, Mode=TwoWay}">
+                                  SelectionChanged="FormatComboBox_SelectionChanged">
                             <x:String>mp4</x:String>
                             <x:String>mp3</x:String>
                             <x:String>Advanced</x:String>
@@ -152,8 +263,7 @@
                                       VerticalAlignment="Center"
                                       HorizontalContentAlignment="Right"
                                       MinWidth="0"
-                                      Toggled="EmbedMetadataToggle_Toggled"
-                                      IsOn="{x:Bind Path=Settings.EmbedMetadata, Mode=TwoWay}"/>
+                                      Toggled="EmbedMetadataToggle_Toggled"/>
                     </Grid>
                 </Border>
 
@@ -186,15 +296,16 @@
                         </Grid>
                     </Expander.Header>
                     <Expander.Content>
-                        <StackPanel Orientation="Vertical" Spacing="12">
+                        <StackPanel Orientation="Vertical"
+                                Spacing="12">
                             <TextBlock Text="Additional command arguments"/>
                             <TextBox x:Name="AdditionalArgumentsTextBox"
                                      HorizontalAlignment="Stretch"
                                      VerticalAlignment="Stretch"
-                                     Text="{x:Bind Path=Settings.AdditionalArguments, Mode=TwoWay}"/>
+                                     TextChanged="AdditionalArgumentsTextBox_TextChanged"/>
                             <ToggleSwitch x:Name="UseSystemFFMPEGToggle"
                                           Header="Override bundled tools"
-                                          IsOn="{x:Bind Path=Settings.UseSystemFFMPEG, Mode=TwoWay}"/>
+                                          Toggled="UseSystemFFMPEGToggle_Toggled"/>
                             <Button x:Name="SaveSettingsButton"
                                     Content="Save"
                                     Click="SaveSettingsUI"/>
@@ -225,7 +336,8 @@
                         </Grid>
                     </Expander.Header>
                     <Expander.Content>
-                        <StackPanel Orientation="Vertical" Spacing="12">
+                        <StackPanel Orientation="Vertical"
+                                Spacing="12">
                             <TextBlock Text="{x:Bind AppVersion, Mode=OneWay}"/>
                             <TextBlock>
                                 <Hyperlink NavigateUri="https://github.com/iqnite/yt-dlp-ui"
