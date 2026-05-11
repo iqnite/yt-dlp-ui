@@ -14,6 +14,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Runtime.Intrinsics.Arm;
 using System.Text.Json;
@@ -21,6 +22,7 @@ using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Windows.ApplicationModel;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
@@ -44,6 +46,23 @@ public sealed partial class HomePage : Page, IDisposable
     private bool IsDownloadCancelled = false;
     private Process? DownloadProcess;
     private CancellationTokenSource? DownloadCancellationTokenSource;
+
+    public string AppVersion
+    {
+        get
+        {
+            try
+            {
+                var version = Package.Current.Id.Version;
+                return $"Version: {version.Major}.{version.Minor}.{version.Build}.{version.Revision}";
+            }
+            catch
+            {
+                var version = Assembly.GetExecutingAssembly().GetName().Version;
+                return $"Version: {(version is null ? "unknown" : $"{version.Major}.{version.Minor}.{version.Build}.{version.Revision}")}";
+            }
+        }
+    }
 
     public HomePage()
     {
