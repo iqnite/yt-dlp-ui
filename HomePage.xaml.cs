@@ -60,15 +60,10 @@ public sealed partial class HomePage : Page, IDisposable
     public async void HomePage_Loaded(object sender, RoutedEventArgs e)
     {
         await LoadSettingsAsync();
-        string downloadFolderPath = Settings.GetActiveProfile().DownloadFolderPath;
-        if (!string.IsNullOrEmpty(downloadFolderPath) && Directory.Exists(downloadFolderPath))
-        {
-            DownloadFolder = await StorageFolder.GetFolderFromPathAsync(downloadFolderPath);
-        }
         UpdateSettingsUI();
     }
 
-    private void UpdateSettingsUI()
+    private async void UpdateSettingsUI()
     {
         if (IsUpdatingSettings) return;
         IsUpdatingSettings = true;
@@ -101,6 +96,11 @@ public sealed partial class HomePage : Page, IDisposable
                 KeepSelectedLinkOption.IsChecked = true;
             }
 
+            string downloadFolderPath = Settings.GetActiveProfile().DownloadFolderPath;
+            if (!string.IsNullOrEmpty(downloadFolderPath) && Directory.Exists(downloadFolderPath))
+            {
+                DownloadFolder = await StorageFolder.GetFolderFromPathAsync(downloadFolderPath);
+            }
             PickDestinationOutputTextBlock.Content = appSettingsProfile.DownloadFolderPath;
             FormatComboBox.SelectedItem = appSettingsProfile.Format;
             AdditionalArgumentsTextBox.Text = appSettingsProfile.AdditionalArguments;
