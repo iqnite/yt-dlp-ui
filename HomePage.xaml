@@ -12,79 +12,85 @@
         <ScrollView>
             <StackPanel Orientation="Vertical"
                         HorizontalAlignment="Stretch"
-                        Spacing="4"
+                        Spacing="8"
                         VerticalAlignment="Top">
 
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+                <Border Padding="16"
+                        CornerRadius="8"
+                        Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}">
+                    <StackPanel Spacing="8">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
 
-                    <TextBox x:Name="LinkTextBox"
-                             Grid.Column="0"
-                             Margin="4"
-                             HorizontalAlignment="Stretch"
-                             AcceptsReturn="False"
-                             TextWrapping="NoWrap"
-                             PlaceholderText="Enter links to videos, songs, playlists, channels..."
-                             KeyUp="LinkTextBox_KeyUp"
-                             TextChanged="LinkTextBox_TextChanged"/>
-                    <Button x:Name="DownloadButton"
-                            Grid.Column="1"
-                            Margin="4"
-                            Content="Paste and Download"
-                            Style="{StaticResource AccentButtonStyle}"
-                            Click="DownloadButton_Click"/>
-                    <Button Grid.Column="2"
-                            x:Name="LinkOptionsButton"
-                            ToolTipService.ToolTip="Link options">
-                        <FontIcon Glyph="&#xE712;" FontSize="16"/>
-                        <Button.Flyout>
-                            <MenuFlyout>
-                                <MenuFlyoutItem Text="When this profile is selected..."
-                                                IsEnabled="False"/>
-                                <RadioMenuFlyoutItem GroupName="LinkOptions"
-                                                     Text="Keep selected link"
-                                                     IsChecked="True"
-                                                     x:Name="KeepSelectedLinkOption"
-                                                     Click="LinkOptions_Click"/>
-                                <RadioMenuFlyoutItem GroupName="LinkOptions"
-                                                     Text="Select last used link in this profile"
-                                                     IsChecked="False"
-                                                     x:Name="SelectLastUsedLinkOption"
-                                                     Click="LinkOptions_Click"/>
-                                <RadioMenuFlyoutItem GroupName="LinkOptions"
-                                                     Text="Clear selected link"
-                                                     IsChecked="False"
-                                                     x:Name="ClearSelectedLinkOption"
-                                                     Click="LinkOptions_Click"/>
-                            </MenuFlyout>
-                        </Button.Flyout>
-                    </Button>
-                </Grid>
+                            <TextBox x:Name="LinkTextBox"
+                                     Grid.Column="0"
+                                     Margin="4"
+                                     HorizontalAlignment="Stretch"
+                                     AcceptsReturn="False"
+                                     TextWrapping="NoWrap"
+                                     PlaceholderText="Enter links to videos, songs, playlists, channels..."
+                                     KeyUp="LinkTextBox_KeyUp"
+                                     TextChanged="LinkTextBox_TextChanged"/>
+                            <Button x:Name="DownloadButton"
+                                    Grid.Column="1"
+                                    Margin="4"
+                                    Content="Paste and Download"
+                                    Style="{StaticResource AccentButtonStyle}"
+                                    Click="DownloadButton_Click"/>
+                            <Button Grid.Column="2"
+                                    x:Name="LinkOptionsButton"
+                                    ToolTipService.ToolTip="Link options">
+                                <FontIcon Glyph="&#xE712;" FontSize="16"/>
+                                <Button.Flyout>
+                                    <MenuFlyout>
+                                        <MenuFlyoutItem Text="When this profile is selected..."
+                                                        IsEnabled="False"/>
+                                        <RadioMenuFlyoutItem GroupName="LinkOptions"
+                                                             Text="Keep selected link"
+                                                             IsChecked="True"
+                                                             x:Name="KeepSelectedLinkOption"
+                                                             Click="LinkOptions_Click"/>
+                                        <RadioMenuFlyoutItem GroupName="LinkOptions"
+                                                             Text="Select last used link in this profile"
+                                                             IsChecked="False"
+                                                             x:Name="SelectLastUsedLinkOption"
+                                                             Click="LinkOptions_Click"/>
+                                        <RadioMenuFlyoutItem GroupName="LinkOptions"
+                                                             Text="Clear selected link"
+                                                             IsChecked="False"
+                                                             x:Name="ClearSelectedLinkOption"
+                                                             Click="LinkOptions_Click"/>
+                                    </MenuFlyout>
+                                </Button.Flyout>
+                            </Button>
+                        </Grid>
 
-                <ProgressBar x:Name="DownloadProgressBar"
-                             Visibility="Collapsed"
-                             IsIndeterminate="True"
-                             ShowPaused="False"
-                             ShowError="False"/>
+                        <ProgressBar x:Name="DownloadProgressBar"
+                                     Visibility="Collapsed"
+                                     IsIndeterminate="True"
+                                     ShowPaused="False"
+                                     ShowError="False"/>
 
-                <InfoBar x:Name="DownloadStatusInfoBar"
-                         IsOpen="False">
-                    <InfoBar.ActionButton>
-                        <Button x:Name="OpenDownloadButton"
-                                Visibility="Collapsed"
-                                Click="OpenDownloadButton_Click">
-                            <StackPanel Orientation="Horizontal"
-                                        Spacing="3">
-                                <FontIcon Glyph="&#xE8DA;"/>
-                                <TextBlock Text="Show"/>
-                            </StackPanel>
-                        </Button>
-                    </InfoBar.ActionButton>
-                </InfoBar>
+                        <InfoBar x:Name="DownloadStatusInfoBar"
+                                 IsOpen="False">
+                            <InfoBar.ActionButton>
+                                <Button x:Name="OpenDownloadButton"
+                                        Visibility="Collapsed"
+                                        Click="OpenDownloadButton_Click">
+                                    <StackPanel Orientation="Horizontal"
+                                                Spacing="3">
+                                        <FontIcon Glyph="&#xE8DA;"/>
+                                        <TextBlock Text="Show"/>
+                                    </StackPanel>
+                                </Button>
+                            </InfoBar.ActionButton>
+                        </InfoBar>
+                    </StackPanel>
+                </Border>
 
                 <Border Padding="12"
                         CornerRadius="8"
@@ -189,7 +195,7 @@
                                                     <Button Content="Remove"
                                                             Click="RemoveProfileConfirm_Click"/>
                                                 </StackPanel>
-                                            </StackPanel>
+                            </StackPanel>
                                         </Flyout>
                                     </Button.Flyout>
                                 </Button>
