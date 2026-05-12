@@ -43,10 +43,23 @@
                         <FontIcon Glyph="&#xE712;" FontSize="16"/>
                         <Button.Flyout>
                             <MenuFlyout>
-                                <ToggleMenuFlyoutItem x:Name="SaveLinksInProfileToggle"
-                                                      Text="Save link in this profile"
-                                                      Click ="SaveLinksInProfileToggle_Click"
-                                                      IsChecked="False"/>
+                                <MenuFlyoutItem Text="When this profile is selected..."
+                                                IsEnabled="False"/>
+                                <RadioMenuFlyoutItem GroupName="LinkOptions"
+                                                     Text="Keep selected link"
+                                                     IsChecked="True"
+                                                     x:Name="KeepSelectedLinkOption"
+                                                     Click="LinkOptions_Click"/>
+                                <RadioMenuFlyoutItem GroupName="LinkOptions"
+                                                     Text="Select last used link in this profile"
+                                                     IsChecked="False"
+                                                     x:Name="SelectLastUsedLinkOption"
+                                                     Click="LinkOptions_Click"/>
+                                <RadioMenuFlyoutItem GroupName="LinkOptions"
+                                                     Text="Clear selected link"
+                                                     IsChecked="False"
+                                                     x:Name="ClearSelectedLinkOption"
+                                                     Click="LinkOptions_Click"/>
                             </MenuFlyout>
                         </Button.Flyout>
                     </Button>

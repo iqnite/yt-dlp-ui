@@ -82,11 +82,22 @@ public sealed partial class HomePage : Page, IDisposable
             UpdateRemoveButtonState();
             ProfilesComboBox.SelectedIndex = Settings.ActiveProfileId;
             AppSettingsProfile appSettingsProfile = Settings.GetActiveProfile();
-            if (appSettingsProfile.IsSavingLink)
+            
+            if (appSettingsProfile.LinkActionOnProfileChange == "SaveLink")
             {
                 LinkTextBox.Text = appSettingsProfile.Link;
+                SelectLastUsedLinkOption.IsChecked = true;
             }
-            SaveLinksInProfileToggle.IsChecked = appSettingsProfile.IsSavingLink;
+            else if (appSettingsProfile.LinkActionOnProfileChange == "ClearLink")
+            {
+                LinkTextBox.Text = string.Empty;
+                ClearSelectedLinkOption.IsChecked = true;
+            }
+            else
+            {
+                KeepSelectedLinkOption.IsChecked = true;
+            }
+
             PickDestinationOutputTextBlock.Content = appSettingsProfile.DownloadFolderPath;
             FormatComboBox.SelectedItem = appSettingsProfile.Format;
             AdditionalArgumentsTextBox.Text = appSettingsProfile.AdditionalArguments;
@@ -516,7 +527,7 @@ public sealed partial class HomePage : Page, IDisposable
     public void LinkTextBox_TextChanged(object sender, TextChangedEventArgs e)
     {
         UpdateDownloadButton();
-        if (Settings.GetActiveProfile().IsSavingLink)
+        if (Settings.GetActiveProfile().LinkActionOnProfileChange == "SaveLink")
         {
             Settings.GetActiveProfile().Link = LinkTextBox.Text;
         }
@@ -560,16 +571,24 @@ public sealed partial class HomePage : Page, IDisposable
         Clipboard.SetContent(dataPackage);
     }
 
-    private void SaveLinksInProfileToggle_Click(object sender, RoutedEventArgs e)
+    private async void LinkOptions_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is ToggleMenuFlyoutItem toggle)
+        if (sender is RadioMenuFlyoutItem radio)
         {
-            Settings.GetActiveProfile().IsSavingLink = toggle.IsChecked;
-            if (toggle.IsChecked)
+            if (radio.Name == "KeepSelectedLinkOption")
             {
+                Settings.GetActiveProfile().LinkActionOnProfileChange = "";
+            }
+            else if (radio.Name == "SelectLastUsedLinkOption")
+            {
+                Settings.GetActiveProfile().LinkActionOnProfileChange = "SaveLink";
                 Settings.GetActiveProfile().Link = LinkTextBox.Text;
             }
+            else if (radio.Name == "ClearSelectedLinkOption")
+            {
+                Settings.GetActiveProfile().LinkActionOnProfileChange = "ClearLink";
+            }
+            await SaveSettingsAsync();
         }
-        SaveSettingsUI(sender, e);
     }
 }
