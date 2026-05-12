@@ -183,7 +183,7 @@ public sealed partial class HomePage : Page, IDisposable
         IsUpdatingSettings = false;
 
         RemoveProfileFlyout.Hide();
-        UpdateRemoveButtonState();
+        UpdateSettingsUI();
     }
 
     private void AddProfileConfirm_Click(object sender, RoutedEventArgs e)
