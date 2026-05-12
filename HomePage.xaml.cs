@@ -114,7 +114,7 @@ public sealed partial class HomePage : Page, IDisposable
         }
     }
 
-    private void ProfilesComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    private async void ProfilesComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (IsUpdatingSettings) return;
         if (ProfilesComboBox.SelectedIndex >= 0)
@@ -122,6 +122,7 @@ public sealed partial class HomePage : Page, IDisposable
             Settings.ActiveProfileId = ProfilesComboBox.SelectedIndex;
         }
         UpdateSettingsUI();
+        await SaveSettingsAsync();
         Debug.WriteLine($"Profile changed to: {ProfilesComboBox.SelectedItem}");
     }
 
@@ -161,11 +162,11 @@ public sealed partial class HomePage : Page, IDisposable
             return;
         }
 
-        var optionsButton = ProfileOptionsButton; // Element created in XAML
+        var optionsButton = ProfileOptionsButton;
         RemoveProfileFlyout.ShowAt(optionsButton);
     }
 
-    private void RemoveProfileConfirm_Click(object sender, RoutedEventArgs e)
+    private async void RemoveProfileConfirm_Click(object sender, RoutedEventArgs e)
     {
         if (ProfilesComboBox.SelectedItem is not string selectedProfile)
         {
@@ -184,9 +185,10 @@ public sealed partial class HomePage : Page, IDisposable
 
         RemoveProfileFlyout.Hide();
         UpdateSettingsUI();
+        await SaveSettingsAsync();
     }
 
-    private void AddProfileConfirm_Click(object sender, RoutedEventArgs e)
+    private async void AddProfileConfirm_Click(object sender, RoutedEventArgs e)
     {
         string profileName = AddProfileNameTextBox.Text.Trim();
 
@@ -216,6 +218,7 @@ public sealed partial class HomePage : Page, IDisposable
         ProfilesComboBox.SelectedItem = profileName;
         AddProfileFlyout.Hide();
         UpdateRemoveButtonState();
+        await SaveSettingsAsync();
     }
 
     private void AddProfileNameTextBox_KeyUp(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
@@ -230,7 +233,7 @@ public sealed partial class HomePage : Page, IDisposable
         }
     }
 
-    private void RenameProfileConfirm_Click(object sender, RoutedEventArgs e)
+    private async void RenameProfileConfirm_Click(object sender, RoutedEventArgs e)
     {
         string profileName = RenameProfileNameTextBox.Text.Trim();
 
@@ -259,6 +262,7 @@ public sealed partial class HomePage : Page, IDisposable
         ProfilesComboBox.SelectedIndex = selectedIndex;
         IsUpdatingSettings = false;
         RenameProfileFlyout.Hide();
+        await SaveSettingsAsync();
     }
 
     private void RenameProfileNameTextBox_KeyUp(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
