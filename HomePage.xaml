@@ -23,7 +23,6 @@
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
 
                             <TextBox x:Name="LinkTextBox"
@@ -41,32 +40,6 @@
                                     Content="Paste and Download"
                                     Style="{StaticResource AccentButtonStyle}"
                                     Click="DownloadButton_Click"/>
-                            <Button Grid.Column="2"
-                                    x:Name="LinkOptionsButton"
-                                    ToolTipService.ToolTip="Link options">
-                                <FontIcon Glyph="&#xE712;" FontSize="16"/>
-                                <Button.Flyout>
-                                    <MenuFlyout>
-                                        <MenuFlyoutItem Text="When switching to this profile:"
-                                                        IsEnabled="False"/>
-                                        <RadioMenuFlyoutItem GroupName="LinkOptions"
-                                                             Text="Keep the current link"
-                                                             IsChecked="True"
-                                                             x:Name="KeepSelectedLinkOption"
-                                                             Click="LinkOptions_Click"/>
-                                        <RadioMenuFlyoutItem GroupName="LinkOptions"
-                                                             Text="Restore this profile's last link"
-                                                             IsChecked="False"
-                                                             x:Name="SelectLastUsedLinkOption"
-                                                             Click="LinkOptions_Click"/>
-                                        <RadioMenuFlyoutItem GroupName="LinkOptions"
-                                                             Text="Clear the link box"
-                                                             IsChecked="False"
-                                                             x:Name="ClearSelectedLinkOption"
-                                                             Click="LinkOptions_Click"/>
-                                    </MenuFlyout>
-                                </Button.Flyout>
-                            </Button>
                         </Grid>
 
                         <ProgressBar x:Name="DownloadProgressBar"
@@ -152,6 +125,24 @@
                                                     <FontIcon Glyph="&#xE74D;"/>
                                                 </MenuFlyoutItem.Icon>
                                             </MenuFlyoutItem>
+                                            <MenuFlyoutSeparator />
+                                            <MenuFlyoutItem Text="When this profile is loaded:"
+                                                            IsEnabled="False" />
+                                            <RadioMenuFlyoutItem GroupName="LinkOptions"
+                                                                 Text="Keep the current link"
+                                                                 IsChecked="True"
+                                                                 x:Name="KeepSelectedLinkOption"
+                                                                 Click="LinkOptions_Click" />
+                                            <RadioMenuFlyoutItem GroupName="LinkOptions"
+                                                                 Text="Restore this profile's last link"
+                                                                 IsChecked="False"
+                                                                 x:Name="SelectLastUsedLinkOption"
+                                                                 Click="LinkOptions_Click" />
+                                            <RadioMenuFlyoutItem GroupName="LinkOptions"
+                                                                 Text="Clear the link box"
+                                                                 IsChecked="False"
+                                                                 x:Name="ClearSelectedLinkOption"
+                                                                 Click="LinkOptions_Click" />
                                         </MenuFlyout>
                                     </Button.Flyout>
                                 </Button>
