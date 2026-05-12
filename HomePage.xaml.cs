@@ -125,6 +125,8 @@ public sealed partial class HomePage : Page, IDisposable
     private void AddProfileButton_Click(object sender, RoutedEventArgs e)
     {
         AddProfileNameTextBox.Text = string.Empty;
+        var optionsButton = ProfileOptionsButton; // Element created in XAML
+        AddProfileFlyout.ShowAt(optionsButton);
         AddProfileNameTextBox.Focus(FocusState.Programmatic);
     }
 
@@ -138,6 +140,8 @@ public sealed partial class HomePage : Page, IDisposable
 
         RenameProfileNameTextBox.Text = currentProfile;
         RenameProfileNameTextBox.SelectAll();
+        var optionsButton = ProfileOptionsButton; // Element created in XAML
+        RenameProfileFlyout.ShowAt(optionsButton);
         RenameProfileNameTextBox.Focus(FocusState.Programmatic);
     }
 
@@ -154,7 +158,8 @@ public sealed partial class HomePage : Page, IDisposable
             return;
         }
 
-        RemoveProfileFlyout.ShowAt(RemoveButton);
+        var optionsButton = ProfileOptionsButton; // Element created in XAML
+        RemoveProfileFlyout.ShowAt(optionsButton);
     }
 
     private void RemoveProfileConfirm_Click(object sender, RoutedEventArgs e)

@@ -121,8 +121,6 @@
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
 
                                 <ComboBox x:Name="ProfilesComboBox"
@@ -130,73 +128,31 @@
                                           SelectionChanged="ProfilesComboBox_SelectionChanged"/>
 
                                 <Button Grid.Column="1"
-                                        x:Name="AddProfileButton"
-                                        Click="AddProfileButton_Click"
-                                        ToolTipService.ToolTip="Add profile">
-                                    <FontIcon Glyph="&#xE710;"
-                                            FontSize="16"/>
+                                        x:Name="ProfileOptionsButton"
+                                        ToolTipService.ToolTip="Profile options">
+                                    <FontIcon Glyph="&#xE712;" FontSize="16"/>
                                     <Button.Flyout>
-                                        <Flyout x:Name="AddProfileFlyout"
-                                                Placement="Bottom">
-                                            <StackPanel Spacing="8"
-                                                    Orientation="Vertical">
-                                                <TextBox x:Name="AddProfileNameTextBox"
-                                                         PlaceholderText="Profile name"
-                                                         KeyUp="AddProfileNameTextBox_KeyUp"
-                                                         MinWidth="200"/>
-                                                <StackPanel Orientation="Horizontal"
-                                                        Spacing="8">
-                                                    <Button Content="Confirm"
-                                                            Click="AddProfileConfirm_Click"/>
-                                                </StackPanel>
-                                            </StackPanel>
-                                        </Flyout>
-                                    </Button.Flyout>
-                                </Button>
-                                <Button Grid.Column="2"
-                                        x:Name="RenameProfileButton"
-                                        Click="RenameProfileButton_Click"
-                                        ToolTipService.ToolTip="Rename profile">
-                                    <FontIcon Glyph="&#xE13E;"
-                                            FontSize="16"/>
-                                    <Button.Flyout>
-                                        <Flyout x:Name="RenameProfileFlyout"
-                                                Placement="Bottom">
-                                            <StackPanel Spacing="8"
-                                                    Orientation="Vertical">
-                                                <TextBox x:Name="RenameProfileNameTextBox"
-                                                         PlaceholderText="New name"
-                                                         KeyUp="RenameProfileNameTextBox_KeyUp"
-                                                         MinWidth="200"/>
-                                                <StackPanel Orientation="Horizontal"
-                                                        Spacing="8">
-                                                    <Button Content="Confirm"
-                                                            Click="RenameProfileConfirm_Click"/>
-                                                </StackPanel>
-                                            </StackPanel>
-                                        </Flyout>
-                                    </Button.Flyout>
-                                </Button>
-                                <Button Grid.Column="3"
-                                        x:Name="RemoveButton"
-                                        Click="RemoveProfileButton_Click"
-                                        ToolTipService.ToolTip="Remove profile">
-                                    <FontIcon Glyph="&#xE74D;"
-                                            FontSize="16"/>
-                                    <Button.Flyout>
-                                        <Flyout x:Name="RemoveProfileFlyout"
-                                                Placement="Bottom">
-                                            <StackPanel Spacing="12"
-                                                    Orientation="Vertical">
-                                                <TextBlock Text="Remove this profile?"
-                                                           FontWeight="Medium"/>
-                                                <StackPanel Orientation="Horizontal"
-                                                        Spacing="8">
-                                                    <Button Content="Remove"
-                                                            Click="RemoveProfileConfirm_Click"/>
-                                                </StackPanel>
-                            </StackPanel>
-                                        </Flyout>
+                                        <MenuFlyout>
+                                            <MenuFlyoutItem Text="Add profile"
+                                                            Click="AddProfileButton_Click">
+                                                <MenuFlyoutItem.Icon>
+                                                    <FontIcon Glyph="&#xE710;"/>
+                                                </MenuFlyoutItem.Icon>
+                                            </MenuFlyoutItem>
+                                            <MenuFlyoutItem Text="Rename profile"
+                                                            Click="RenameProfileButton_Click">
+                                                <MenuFlyoutItem.Icon>
+                                                    <FontIcon Glyph="&#xE13E;"/>
+                                                </MenuFlyoutItem.Icon>
+                                            </MenuFlyoutItem>
+                                            <MenuFlyoutItem Text="Remove profile"
+                                                            x:Name="RemoveButton"
+                                                            Click="RemoveProfileButton_Click">
+                                                <MenuFlyoutItem.Icon>
+                                                    <FontIcon Glyph="&#xE74D;"/>
+                                                </MenuFlyoutItem.Icon>
+                                            </MenuFlyoutItem>
+                                        </MenuFlyout>
                                     </Button.Flyout>
                                 </Button>
                             </Grid>
@@ -437,4 +393,35 @@
         <ProgressRing x:Name="SavingSettingsProgressRing"
                       IsActive="False"/>
     </Grid>
+
+    <Page.Resources>
+        <!-- Input Flyouts attached as resources so they can be shown via code-behind -->
+        <Flyout x:Name="AddProfileFlyout" Placement="Bottom">
+            <StackPanel Spacing="8" Orientation="Vertical">
+                <TextBox x:Name="AddProfileNameTextBox" PlaceholderText="Profile name" KeyUp="AddProfileNameTextBox_KeyUp" MinWidth="200"/>
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Button Content="Confirm" Click="AddProfileConfirm_Click"/>
+                </StackPanel>
+            </StackPanel>
+        </Flyout>
+
+        <Flyout x:Name="RenameProfileFlyout" Placement="Bottom">
+            <StackPanel Spacing="8" Orientation="Vertical">
+                <TextBox x:Name="RenameProfileNameTextBox" PlaceholderText="New name" KeyUp="RenameProfileNameTextBox_KeyUp" MinWidth="200"/>
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Button Content="Confirm" Click="RenameProfileConfirm_Click"/>
+                </StackPanel>
+            </StackPanel>
+        </Flyout>
+
+        <Flyout x:Name="RemoveProfileFlyout" Placement="Bottom">
+            <StackPanel Spacing="12" Orientation="Vertical">
+                <TextBlock Text="Remove this profile?" FontWeight="Medium"/>
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Button Content="Remove" Click="RemoveProfileConfirm_Click"/>
+                </StackPanel>
+            </StackPanel>
+        </Flyout>
+    </Page.Resources>
+
 </Page>
