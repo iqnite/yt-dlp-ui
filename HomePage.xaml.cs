@@ -82,7 +82,10 @@ public sealed partial class HomePage : Page, IDisposable
             UpdateRemoveButtonState();
             ProfilesComboBox.SelectedIndex = Settings.ActiveProfileId;
             AppSettingsProfile appSettingsProfile = Settings.GetActiveProfile();
-            
+
+            SelectLastUsedLinkOption.IsChecked = false;
+            ClearSelectedLinkOption.IsChecked = false;
+            KeepSelectedLinkOption.IsChecked = false;
             if (appSettingsProfile.LinkActionOnProfileChange == "SaveLink")
             {
                 LinkTextBox.Text = appSettingsProfile.Link;
@@ -201,6 +204,7 @@ public sealed partial class HomePage : Page, IDisposable
         AppSettingsProfile newProfile = new()
         {
             Name = profileName,
+            LinkActionOnProfileChange = Settings.GetActiveProfile().LinkActionOnProfileChange,
             DownloadFolderPath = Settings.GetActiveProfile().DownloadFolderPath,
             AdditionalArguments = Settings.GetActiveProfile().AdditionalArguments,
             Format = Settings.GetActiveProfile().Format,
