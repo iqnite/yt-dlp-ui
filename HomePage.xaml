@@ -19,6 +19,7 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
                     <TextBox x:Name="LinkTextBox"
@@ -27,7 +28,7 @@
                              HorizontalAlignment="Stretch"
                              AcceptsReturn="False"
                              TextWrapping="NoWrap"
-                             PlaceholderText="Enter a video, song, playlist, or channel link"
+                             PlaceholderText="Enter links to videos, songs, playlists, channels..."
                              KeyUp="LinkTextBox_KeyUp"
                              TextChanged="LinkTextBox_TextChanged"/>
                     <Button x:Name="DownloadButton"
@@ -36,6 +37,19 @@
                             Content="Paste and Download"
                             Style="{StaticResource AccentButtonStyle}"
                             Click="DownloadButton_Click"/>
+                    <Button Grid.Column="2"
+                            x:Name="LinkOptionsButton"
+                            ToolTipService.ToolTip="Link options">
+                        <FontIcon Glyph="&#xE712;" FontSize="16"/>
+                        <Button.Flyout>
+                            <MenuFlyout>
+                                <ToggleMenuFlyoutItem x:Name="SaveLinksInProfileToggle"
+                                                      Text="Save link in this profile"
+                                                      Click ="SaveLinksInProfileToggle_Click"
+                                                      IsChecked="False"/>
+                            </MenuFlyout>
+                        </Button.Flyout>
+                    </Button>
                 </Grid>
 
                 <ProgressBar x:Name="DownloadProgressBar"

@@ -81,11 +81,17 @@ public sealed partial class HomePage : Page, IDisposable
             }
             UpdateRemoveButtonState();
             ProfilesComboBox.SelectedIndex = Settings.ActiveProfileId;
-            PickDestinationOutputTextBlock.Content = Settings.GetActiveProfile().DownloadFolderPath;
-            FormatComboBox.SelectedItem = Settings.GetActiveProfile().Format;
-            AdditionalArgumentsTextBox.Text = Settings.GetActiveProfile().AdditionalArguments;
-            EmbedMetadataToggle.IsOn = Settings.GetActiveProfile().EmbedMetadata;
-            UseSystemFFMPEGToggle.IsOn = Settings.GetActiveProfile().UseSystemFFMPEG;
+            AppSettingsProfile appSettingsProfile = Settings.GetActiveProfile();
+            if (appSettingsProfile.IsSavingLink)
+            {
+                LinkTextBox.Text = appSettingsProfile.Link;
+            }
+            SaveLinksInProfileToggle.IsChecked = appSettingsProfile.IsSavingLink;
+            PickDestinationOutputTextBlock.Content = appSettingsProfile.DownloadFolderPath;
+            FormatComboBox.SelectedItem = appSettingsProfile.Format;
+            AdditionalArgumentsTextBox.Text = appSettingsProfile.AdditionalArguments;
+            EmbedMetadataToggle.IsOn = appSettingsProfile.EmbedMetadata;
+            UseSystemFFMPEGToggle.IsOn = appSettingsProfile.UseSystemFFMPEG;
             BadgeNotificationManager.Current.SetBadgeAsGlyph(BadgeNotificationGlyph.None);
         }
         finally
@@ -510,6 +516,10 @@ public sealed partial class HomePage : Page, IDisposable
     public void LinkTextBox_TextChanged(object sender, TextChangedEventArgs e)
     {
         UpdateDownloadButton();
+        if (Settings.GetActiveProfile().IsSavingLink)
+        {
+            Settings.GetActiveProfile().Link = LinkTextBox.Text;
+        }
     }
 
     public void UpdateDownloadButton()
@@ -548,5 +558,18 @@ public sealed partial class HomePage : Page, IDisposable
         var dataPackage = new DataPackage();
         dataPackage.SetText(command);
         Clipboard.SetContent(dataPackage);
+    }
+
+    private void SaveLinksInProfileToggle_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is ToggleMenuFlyoutItem toggle)
+        {
+            Settings.GetActiveProfile().IsSavingLink = toggle.IsChecked;
+            if (toggle.IsChecked)
+            {
+                Settings.GetActiveProfile().Link = LinkTextBox.Text;
+            }
+        }
+        SaveSettingsUI(sender, e);
     }
 }

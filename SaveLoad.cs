@@ -35,6 +35,8 @@ namespace YT_DLP_UI
             }
 
             public string Name { get; set; } = "Default";
+            public string Link { get; set; } = string.Empty;
+            public bool IsSavingLink { get; set; } = false;
             public string DownloadFolderPath { get; set; } = string.Empty;
             public string AdditionalArguments { get; set; } = string.Empty;
             public string Format { get; set; } = "mp4";
