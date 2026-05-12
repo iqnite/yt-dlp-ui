@@ -165,6 +165,7 @@ namespace YT_DLP_UI
 
         public async Task LoadSettingsAsync()
         {
+            bool shouldSaveMigration = false;
             try
             {
                 await _settingsLock.WaitAsync();
@@ -204,7 +205,7 @@ namespace YT_DLP_UI
                         ActiveProfileId = 0
                     };
                     Debug.WriteLine("Migration successful, saving new settings format");
-                    await SaveSettingsAsync();
+                    shouldSaveMigration = true;
                 }
                 else
                 {
@@ -225,14 +226,24 @@ namespace YT_DLP_UI
             }
             finally
             {
-                var activeProfile = Settings.GetActiveProfile();
-                activeProfile.DownloadFolderPath ??= string.Empty;
-                activeProfile.Format ??= "mp4";
-                activeProfile.AdditionalArguments ??= string.Empty;
+                if (Settings.Profiles == null || Settings.Profiles.Length == 0)
+                {
+                    Settings.Profiles = [new AppSettingsProfile()];
+                    Settings.ActiveProfileId = 0;
+                }
+
+                Settings.GetActiveProfile().DownloadFolderPath ??= string.Empty;
+                Settings.GetActiveProfile().Format ??= "mp4";
+                Settings.GetActiveProfile().AdditionalArguments ??= string.Empty;
 
                 _isSettingsLoaded = true;
                 _settingsLock.Release();
                 Debug.WriteLine("Settings are ready for use");
+            }
+
+            if (shouldSaveMigration)
+            {
+                await SaveSettingsAsync();
             }
         }
     }
