@@ -129,7 +129,7 @@ public sealed partial class HomePage : Page, IDisposable
     private void AddProfileButton_Click(object sender, RoutedEventArgs e)
     {
         AddProfileNameTextBox.Text = string.Empty;
-        var optionsButton = ProfileOptionsButton; // Element created in XAML
+        var optionsButton = AddProfileButton;
         AddProfileFlyout.ShowAt(optionsButton);
         AddProfileNameTextBox.Focus(FocusState.Programmatic);
     }
@@ -144,7 +144,7 @@ public sealed partial class HomePage : Page, IDisposable
 
         RenameProfileNameTextBox.Text = currentProfile;
         RenameProfileNameTextBox.SelectAll();
-        var optionsButton = ProfileOptionsButton; // Element created in XAML
+        var optionsButton = ProfileOptionsButton;
         RenameProfileFlyout.ShowAt(optionsButton);
         RenameProfileNameTextBox.Focus(FocusState.Programmatic);
     }
