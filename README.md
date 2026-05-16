@@ -18,4 +18,4 @@ An intuitive and powerful video downloader for Windows based on the [yt-dlp proj
 
 ## AI Usage Disclaimer
 
-This project is made by a human developer and is not "vibe-coded". However, AI tools were used for tasks such as boilerplate generation, code review, debugging, and research. AI outputs were carefully reviewed and adapted to ensure the quality and functionality of the application. All icons, graphics, and texts are completely hand-made.
+This project was built by a human developer and is not "vibe-coded". However, AI tools were used for tasks such as boilerplate generation, code review, debugging, and research. AI outputs were carefully reviewed and adapted to ensure the quality and functionality of the application. All icons, graphics, and texts are entirely hand-made.
