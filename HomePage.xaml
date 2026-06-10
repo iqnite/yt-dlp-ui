@@ -84,7 +84,7 @@
                                 <TextBlock Text="Profile"
                                            FontWeight="Medium"
                                            FontSize="16"/>
-                                <TextBlock Text="Manage different download configurations"
+                                <TextBlock Text="Manage different download configurations."
                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                            FontSize="12"/>
                             </StackPanel>
@@ -316,7 +316,10 @@
                             <StackPanel Grid.Column="1">
                                 <TextBlock Text="About"
                                            FontWeight="Medium"
-                                           FontSize="16"/>
+                                           FontSize="16" />
+                                <TextBlock Text="Get help and give feedback."
+                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                           FontSize="12" />
                             </StackPanel>
                         </Grid>
                     </Expander.Header>
@@ -325,9 +328,9 @@
                                 Spacing="12">
                             <TextBlock Text="{x:Bind AppVersion, Mode=OneWay}"/>
                             <TextBlock>
-                                <Hyperlink NavigateUri="https://github.com/iqnite/yt-dlp-ui"
+                                <Hyperlink NavigateUri="https://github.com/iqnite/yt-dlp-ui/issues"
                                            Foreground="{ThemeResource AccentFillColorDefaultBrush}">
-                                    Wyder Video Downloader on GitHub
+                                    Give feedback or report an issue
                                 </Hyperlink>
                             </TextBlock>
                             <TextBlock FontWeight="Bold">
