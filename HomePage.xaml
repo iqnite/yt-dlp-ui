@@ -294,6 +294,9 @@
                             <Button x:Name="CopyCommandButton"
                                     Content="Copy download command"
                                     Click="CopyCommandButton_Click"/>
+                            <Button x:Name="CopyAppDataPathButton"
+                                    Content="Copy app data path"
+                                    Click="CopyAppDataPathButton_Click" />
                         </StackPanel>
                     </Expander.Content>
                 </Expander>

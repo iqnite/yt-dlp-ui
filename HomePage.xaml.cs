@@ -584,6 +584,14 @@ public sealed partial class HomePage : Page, IDisposable
         Clipboard.SetContent(dataPackage);
     }
 
+    private void CopyAppDataPathButton_Click(object sender, RoutedEventArgs e)
+    {
+        string appDataPath = ApplicationData.Current.LocalFolder.Path;
+        var dataPackage = new DataPackage();
+        dataPackage.SetText(appDataPath);
+        Clipboard.SetContent(dataPackage);
+    }
+
     private async void LinkOptions_Click(object sender, RoutedEventArgs e)
     {
         if (sender is RadioMenuFlyoutItem radio)
