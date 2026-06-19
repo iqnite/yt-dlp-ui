@@ -269,7 +269,7 @@
                                            FontSize="16"/>
                                 <TextBlock FontSize="12"
                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}">
-                                    <Run Text="Settings intended for advanced users. See the"/>
+                                    <Run Text="Settings intended for troubleshooting and advanced users. See the"/>
                                     <Hyperlink NavigateUri="https://github.com/yt-dlp/yt-dlp#usage-and-options"
                                                Foreground="{ThemeResource AccentFillColorDefaultBrush}">
                                         <Run Text="yt-dlp documentation"/>
