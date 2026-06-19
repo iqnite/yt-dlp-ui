@@ -211,9 +211,11 @@
                                   VerticalAlignment="Center"
                                   IsEditable="False"
                                   SelectionChanged="FormatComboBox_SelectionChanged">
-                            <x:String>mp4</x:String>
-                            <x:String>mp3</x:String>
-                            <x:String>Advanced</x:String>
+                            <x:String>Video and Audio (mp4)</x:String>
+                            <x:String>Audio only (mp3)</x:String>
+                            <x:String>Audio only (aac)</x:String>
+                            <x:String>Video and Audio (mkv)</x:String>
+                            <x:String>Use command line options (advanced)</x:String>
                         </ComboBox>
                     </Grid>
                 </Border>

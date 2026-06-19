@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.Storage;
@@ -246,6 +247,27 @@ namespace YT_DLP_UI
                 await SaveSettingsAsync();
             }
         }
+
+        public static string? GetFormatFromDisplayName(string format)
+        {
+            var match = FormatRegex().Match(format);
+            return match.Success ? match.Groups[1].Value : null;
+        }
+
+        public string? GetDisplayNameFromFormat(string format)
+        {
+            foreach (var item in FormatComboBox.Items)
+            {
+                if (item.ToString() is string displayName && GetFormatFromDisplayName(displayName) == format)
+                {
+                    return displayName;
+                }
+            }
+            return null;
+        }
+
+        [GeneratedRegex(@"\((.*)\)$")]
+        private static partial Regex FormatRegex();
     }
 
     [JsonSerializable(typeof(HomePage.AppSettings))]

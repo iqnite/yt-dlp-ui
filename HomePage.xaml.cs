@@ -102,7 +102,7 @@ public sealed partial class HomePage : Page, IDisposable
                 DownloadFolder = await StorageFolder.GetFolderFromPathAsync(downloadFolderPath);
             }
             PickDestinationOutputTextBlock.Content = appSettingsProfile.DownloadFolderPath;
-            FormatComboBox.SelectedItem = appSettingsProfile.Format;
+            FormatComboBox.SelectedItem = GetDisplayNameFromFormat(appSettingsProfile.Format) ?? FormatComboBox.Items[0];
             AdditionalArgumentsTextBox.Text = appSettingsProfile.AdditionalArguments;
             EmbedMetadataToggle.IsOn = appSettingsProfile.EmbedMetadata;
             UseSystemFFMPEGToggle.IsOn = appSettingsProfile.UseSystemFFMPEG;
@@ -553,7 +553,7 @@ public sealed partial class HomePage : Page, IDisposable
     }
     private async void FormatComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        Settings.GetActiveProfile().Format = FormatComboBox.SelectedItem.ToString() ?? "mp4";
+        Settings.GetActiveProfile().Format = GetFormatFromDisplayName(FormatComboBox.SelectedItem.ToString() ?? "") ?? "mp4";
         await SaveSettingsAsync();
     }
 
