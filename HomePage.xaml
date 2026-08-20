@@ -237,7 +237,7 @@
                             <TextBlock Text="Embed Metadata"
                                        FontWeight="Medium"
                                        FontSize="16"/>
-                            <TextBlock Text="Add thumbnail, subtitles, author, and other information to the downloaded file."
+                            <TextBlock Text="Add thumbnail, subtitles, author, and other information to the downloaded file. Disable this option if you run into download issues."
                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                        FontSize="12"/>
                         </StackPanel>
