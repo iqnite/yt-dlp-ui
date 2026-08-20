@@ -42,6 +42,7 @@ namespace YT_DLP_UI
             public string AdditionalArguments { get; set; } = string.Empty;
             public string Format { get; set; } = "mp4";
             public bool EmbedMetadata { get; set; } = true;
+            public bool Sponsorblock { get; set; } = false;
             public bool UseSystemFFMPEG { get; set; }
         }
 
@@ -96,6 +97,15 @@ namespace YT_DLP_UI
             if (sender is ToggleSwitch toggle)
             {
                 Settings.GetActiveProfile().EmbedMetadata = toggle.IsOn;
+            }
+            SaveSettingsUI(sender, e);
+        }
+
+        public async void SponsorblockToggle_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (sender is ToggleSwitch toggle)
+            {
+                Settings.GetActiveProfile().Sponsorblock = toggle.IsOn;
             }
             SaveSettingsUI(sender, e);
         }
@@ -201,6 +211,7 @@ namespace YT_DLP_UI
                                 AdditionalArguments = loadedOldSettings.AdditionalArguments,
                                 Format = loadedOldSettings.Format,
                                 EmbedMetadata = loadedOldSettings.EmbedMetadata,
+                                Sponsorblock = loadedOldSettings.Sponsorblock,
                                 UseSystemFFMPEG = loadedOldSettings.UseSystemFFMPEG
                             } ],
                         ActiveProfileId = 0

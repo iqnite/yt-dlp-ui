@@ -105,6 +105,7 @@ public sealed partial class HomePage : Page, IDisposable
             FormatComboBox.SelectedItem = GetDisplayNameFromFormat(appSettingsProfile.Format) ?? FormatComboBox.Items[0];
             AdditionalArgumentsTextBox.Text = appSettingsProfile.AdditionalArguments;
             EmbedMetadataToggle.IsOn = appSettingsProfile.EmbedMetadata;
+            SponsorblockToggle.IsOn = appSettingsProfile.Sponsorblock;
             UseSystemFFMPEGToggle.IsOn = appSettingsProfile.UseSystemFFMPEG;
             BadgeNotificationManager.Current.SetBadgeAsGlyph(BadgeNotificationGlyph.None);
         }
@@ -211,6 +212,7 @@ public sealed partial class HomePage : Page, IDisposable
             AdditionalArguments = Settings.GetActiveProfile().AdditionalArguments,
             Format = Settings.GetActiveProfile().Format,
             EmbedMetadata = Settings.GetActiveProfile().EmbedMetadata,
+            Sponsorblock = Settings.GetActiveProfile().Sponsorblock,
             UseSystemFFMPEG = Settings.GetActiveProfile().UseSystemFFMPEG
         };
         Settings.AddAndUseProfile(newProfile);
@@ -484,6 +486,7 @@ public sealed partial class HomePage : Page, IDisposable
             + (Settings.GetActiveProfile().UseSystemFFMPEG ? "" : $" --ffmpeg-location \"{FFMPEGPath}\" --js-runtimes deno:\"{DenoPath}\"")
             + (Settings.GetActiveProfile().Format.Equals("advanced", StringComparison.CurrentCultureIgnoreCase) ? "" : $" -t \"{Settings.GetActiveProfile().Format.ToLower()}\"")
             + (Settings.GetActiveProfile().EmbedMetadata ? " --embed-metadata --embed-subs --embed-thumbnail" : "")
+            + (Settings.GetActiveProfile().Sponsorblock ? " --sponsorblock-remove sponsor" : "")
             + " " + Settings.GetActiveProfile().AdditionalArguments
             + " " + link;
     }

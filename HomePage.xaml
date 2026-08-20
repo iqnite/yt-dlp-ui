@@ -251,6 +251,37 @@
                     </Grid>
                 </Border>
 
+                <Border Padding="12"
+                        CornerRadius="8"
+                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                    <Grid ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <FontIcon Glyph="&#xECE4;"
+                                  FontSize="24"
+                                  VerticalAlignment="Center" />
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="Remove sponsor clips"
+                                       FontWeight="Medium"
+                                       FontSize="16" />
+                            <TextBlock Text="Remove sponsored segments from the downloaded file. To support creators, you should leave this option off. Disable this option if you run into download issues."
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                       FontSize="12" />
+                        </StackPanel>
+                        <ToggleSwitch x:Name="SponsorblockToggle"
+                                      Grid.Column="2"
+                                      HorizontalAlignment="Right"
+                                      VerticalAlignment="Center"
+                                      HorizontalContentAlignment="Right"
+                                      MinWidth="0"
+                                      Toggled="SponsorblockToggle_Toggled" />
+                    </Grid>
+                </Border>
+
                 <Expander HorizontalAlignment="Stretch"
                           Padding="12">
                     <Expander.Header>
